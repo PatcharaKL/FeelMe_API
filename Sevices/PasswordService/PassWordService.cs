@@ -1,11 +1,14 @@
-public class PassWordService
+namespace Project_FeelMe.Service.PassWordService;
+
+    public partial class PassWordService:IPassWordService
 {
-     public string HashPassword(string password) 
+     public virtual async Task<string> HashPassword(string password) 
         { 
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            return await Task.FromResult<string>(BCrypt.Net.BCrypt.HashPassword(password));
         }
-        public bool CheckPassword(string password,string hashPassword)
+        public virtual async Task<bool> CheckPassword(string password,string hashPassword)
         {
-            return BCrypt.Net.BCrypt.Verify(password,hashPassword) ;
+            return await Task.FromResult<bool>(BCrypt.Net.BCrypt.Verify(password,hashPassword));
         }
 }
+
