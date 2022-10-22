@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./dotnet
+        working-directory: .\dotnet
 
     steps:
       - uses: actions/checkout@v3
