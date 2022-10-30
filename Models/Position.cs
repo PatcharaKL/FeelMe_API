@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace FeelMe.Models
+namespace Project_FeelMe.Models
 {
     public partial class Position
     {

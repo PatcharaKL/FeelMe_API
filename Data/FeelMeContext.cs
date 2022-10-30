@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using FeelMe.Models;
+using Project_FeelMe.Models;
 
-namespace FeelMe.Data
+namespace Project_FeelMe.Data
 {
     public partial class FeelMeContext : DbContext
     {
