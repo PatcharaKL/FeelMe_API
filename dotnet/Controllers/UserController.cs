@@ -31,7 +31,7 @@ namespace Project_FeelMe.Controllers
                 return Ok(token);
             }
 
-            return NotFound("User not found");
+            return Unauthorized("User not found");
         }
         private  AccountViewModels  Authenticate (UserLogin userLogin)
         {
