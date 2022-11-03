@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using Project_FeelMe.Data;
 using Project_FeelMe.Service.PassWordService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IPassWordService,PassWordService>();
+ builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 
 var app = builder.Build();
 
