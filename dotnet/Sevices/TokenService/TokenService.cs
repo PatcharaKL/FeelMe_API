@@ -21,17 +21,16 @@ namespace dotnet.Sevices.TokenService
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Email),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Surname, user.Surname),
-                new Claim(ClaimTypes.Role, user.PositionId.ToString())
-               
+                new Claim("Email", user.Email),
+                new Claim("Name", user.Name),
+                new Claim("Surname", user.Surname),
+                new Claim("Role", user.PositionId.ToString())  
             };
 
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
               _config["Jwt:Audience"],
               claims,
+              expires:DateTime.Now.AddMinutes(15),
               signingCredentials: credentials);
 
             return  await Task.FromResult<string>(new JwtSecurityTokenHandler().WriteToken(token));
