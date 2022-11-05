@@ -5,7 +5,8 @@ namespace dotnet.Sevices.TokenService
 {
     public interface ITokenService
     {
-          Task<string> GeneraterToken(AccountViewModels user);
+          Task<string> GeneraterTokenAccess(AccountViewModels user);
           Task<AccountViewModels> DeCodeToken(string token);
+          Task<string> GeneraterRefreshToken();
     }
 }

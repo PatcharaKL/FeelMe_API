@@ -27,12 +27,19 @@ namespace Project_FeelMe.Controllers
 
             if (user != null)
             {
-                var token = await _tokenService.GeneraterToken(user);
-                return Ok(token);
+                var result = new ResultToken
+                {
+                    accessToken =  await _tokenService.GeneraterTokenAccess(user),
+                    refreshToken = await _tokenService.GeneraterRefreshToken()
+                };
+                // var accessToken = await _tokenService.GeneraterTokenAccess(user);
+                // var refreshToken = await _tokenService.GeneraterRefreshToken();
+                return Ok(result);
             }
 
             return Unauthorized("User not found");
         }
+
         private  AccountViewModels  Authenticate (UserLogin userLogin)
         {
 

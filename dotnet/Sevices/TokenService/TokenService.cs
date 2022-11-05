@@ -14,7 +14,7 @@ namespace dotnet.Sevices.TokenService
             {
                  _config = config;
             }
-            public virtual async Task<string> GeneraterToken(AccountViewModels user)
+            public virtual async Task<string> GeneraterTokenAccess(AccountViewModels user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -47,6 +47,10 @@ namespace dotnet.Sevices.TokenService
                     PositionId = Convert.ToInt32(data.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value)
                 };
              return  await Task.FromResult(user);
+        }
+        public virtual async Task<string> GeneraterRefreshToken()
+        {
+            return await Task.FromResult<string>(String.Join("-",Enumerable.Range(0,4).Select(options => Guid.NewGuid().ToString()).ToList()));
         }
     }
 }
