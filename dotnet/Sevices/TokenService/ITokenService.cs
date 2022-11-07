@@ -1,12 +1,12 @@
 using dotnet.ViewModel;
-
+using Project_FeelMe.Models;
 
 namespace dotnet.Sevices.TokenService
 {
     public interface ITokenService
     {
-          Task<string> GeneraterTokenAccess(AccountViewModels user);
+          Task<string> GeneraterTokenAccess(Account user);
           Task<AccountViewModels> DeCodeToken(string token);
-          Task<string> GeneraterRefreshToken();
+          Task<string> GeneraterRefreshToken(Account user);
     }
 }

@@ -17,47 +17,19 @@ namespace Project_FeelMe.Data
         {
         }
 
-        public virtual DbSet<Access> Accesses { get; set; } = null!;
-        public virtual DbSet<Account> Accounts { get; set; } = null!;
-        public virtual DbSet<Board> Boards { get; set; } = null!;
-        public virtual DbSet<Comment> Comments { get; set; } = null!;
-        public virtual DbSet<Company> Companies { get; set; } = null!;
-        public virtual DbSet<Department> Departments { get; set; } = null!;
-        public virtual DbSet<Log> Logs { get; set; } = null!;
-        public virtual DbSet<Position> Positions { get; set; } = null!;
+        public virtual DbSet<Account> Accounts { get; set; }
+        public virtual DbSet<Board> Boards { get; set; }
+        public virtual DbSet<Comment> Comments { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<Department> Departments { get; set; }
+        public virtual DbSet<Log> Logs { get; set; }
+        public virtual DbSet<Position> Positions { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
-
-            modelBuilder.Entity<Access>(entity =>
-            {
-                entity.HasKey(e => new { e.AccesseId, e.AdcountId })
-                    .HasName("PRIMARY")
-                    .HasAnnotation("MySql:IndexPrefixLength", new[] { 0, 0 });
-
-                entity.ToTable("accesses");
-
-                entity.HasCharSet("utf8mb4")
-                    .UseCollation("utf8mb4_unicode_ci");
-
-                entity.HasIndex(e => e.AdcountId, "adcouunt_id_idx");
-
-                entity.Property(e => e.AccesseId)
-                    .HasColumnType("int(11)")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnName("accesse_id");
-
-                entity.Property(e => e.AdcountId)
-                    .HasColumnType("int(11)")
-                    .HasColumnName("adcount_id");
-
-                entity.Property(e => e.Created)
-                    .HasColumnType("datetime")
-                    .HasColumnName("created")
-                    .HasDefaultValueSql("current_timestamp()");
-            });
 
             modelBuilder.Entity<Account>(entity =>
             {
@@ -107,6 +79,7 @@ namespace Project_FeelMe.Data
                     .HasDefaultValueSql("current_timestamp()");
 
                 entity.Property(e => e.Email)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("email");
 
@@ -115,22 +88,26 @@ namespace Project_FeelMe.Data
                     .HasColumnName("hp");
 
                 entity.Property(e => e.IsActive)
-                    .HasMaxLength(100)
-                    .HasColumnName("is_active");
+                    .IsRequired()
+                    .HasColumnName("is_active")
+                    .HasDefaultValueSql("'1'");
 
                 entity.Property(e => e.Level)
                     .HasColumnType("int(11)")
                     .HasColumnName("level");
 
                 entity.Property(e => e.Name)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("name");
 
                 entity.Property(e => e.PasswordHash)
+                    .IsRequired()
                     .HasMaxLength(256)
                     .HasColumnName("password_hash");
 
                 entity.Property(e => e.Surname)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("surname");
 
@@ -180,10 +157,12 @@ namespace Project_FeelMe.Data
                     .HasDefaultValueSql("current_timestamp()");
 
                 entity.Property(e => e.StoryBoard)
+                    .IsRequired()
                     .HasColumnType("mediumtext")
                     .HasColumnName("story_board");
 
                 entity.Property(e => e.TitelBoard)
+                    .IsRequired()
                     .HasMaxLength(500)
                     .HasColumnName("titel_board");
             });
@@ -216,6 +195,7 @@ namespace Project_FeelMe.Data
                     .HasColumnName("borad_id");
 
                 entity.Property(e => e.CommentText)
+                    .IsRequired()
                     .HasColumnType("mediumtext")
                     .HasColumnName("comment_text");
 
@@ -249,13 +229,14 @@ namespace Project_FeelMe.Data
                     .HasMaxLength(45)
                     .HasColumnName("creator_id");
 
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("name");
+
                 entity.Property(e => e.RoomName)
                     .HasMaxLength(100)
                     .HasColumnName("room_name");
-
-                entity.Property(e => e.Surname)
-                    .HasMaxLength(100)
-                    .HasColumnName("surname");
             });
 
             modelBuilder.Entity<Department>(entity =>
@@ -285,6 +266,7 @@ namespace Project_FeelMe.Data
                     .HasDefaultValueSql("current_timestamp()");
 
                 entity.Property(e => e.DepartmentName)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("department_name");
 
@@ -348,8 +330,34 @@ namespace Project_FeelMe.Data
                     .HasDefaultValueSql("current_timestamp()");
 
                 entity.Property(e => e.PositionName)
+                    .IsRequired()
                     .HasMaxLength(100)
                     .HasColumnName("position_name");
+            });
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.HasKey(e => e.refreshToken)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("refresh_token");
+
+                entity.HasIndex(e => e.AccountId, "account_id");
+
+                entity.Property(e => e.refreshToken).HasColumnName("refreshToken");
+
+                entity.Property(e => e.AccountId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("account_id");
+
+                entity.Property(e => e.Exp)
+                    .HasColumnType("datetime")
+                    .HasColumnName("exp");
+
+                entity.Property(e => e.IsValid)
+                    .IsRequired()
+                    .HasColumnName("isValid")
+                    .HasDefaultValueSql("'1'");
             });
 
             OnModelCreatingPartial(modelBuilder);

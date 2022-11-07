@@ -12,9 +12,9 @@ namespace Project_FeelMe.Models
         }
 
         public int CompanyId { get; set; }
-        public string Surname { get; set; } = null!;
-        public string RoomName { get; set; } = null!;
-        public string CreatorId { get; set; } = null!;
+        public string Name { get; set; }
+        public string RoomName { get; set; }
+        public string CreatorId { get; set; }
         public DateTime Created { get; set; }
 
         public virtual ICollection<Account> Accounts { get; set; }
