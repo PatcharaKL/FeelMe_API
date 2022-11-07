@@ -11,7 +11,7 @@ namespace Project_FeelMe.Models
         }
 
         public int PositionId { get; set; }
-        public string PositionName { get; set; } = null!;
+        public string PositionName { get; set; }
         public DateTime Created { get; set; }
 
         public virtual ICollection<Account> Accounts { get; set; }
