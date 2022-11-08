@@ -44,7 +44,7 @@ namespace Project_FeelMe.Controllers
                     return Ok(result);
                 }
             }
-            catch (System.Exception)
+            catch (Exception)
             {
                 return Unauthorized("User not found");
             }
@@ -132,8 +132,10 @@ namespace Project_FeelMe.Controllers
                 return UnprocessableEntity();
             }
         }
+      
         private async Task<Account> Authenticate(UserLogin userLogin)
         {
+           
             var userAccount = await (
              from account in _dbContract.Accounts
              where (account.Email == userLogin.Email)
@@ -150,7 +152,8 @@ namespace Project_FeelMe.Controllers
                  DepartmentId = account.DepartmentId,
                  CompanyId = account.CompanyId
              }).FirstOrDefaultAsync();
-            if (userAccount.PasswordHash == userLogin.Password) return userAccount;
+              var ckPasswordHash = await _passwordService.CheckPassword(userLogin.Password,userAccount.PasswordHash);
+            if (ckPasswordHash == true) return userAccount;
             else return null;
         }
     }
