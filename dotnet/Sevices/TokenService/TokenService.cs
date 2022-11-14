@@ -22,16 +22,15 @@ namespace dotnet.Sevices.TokenService
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            var position = await (from positionDb in _dbContract.Positions
-                                   where (positionDb.PositionId == user.PositionId)
-                                    select new Position{ PositionName = positionDb.PositionName } ).FirstOrDefaultAsync();
             var claims = new[]
             {
                 new Claim("Email", user.Email),
                 new Claim("Name", user.Name),
                 new Claim("Surname", user.Surname),
-                new Claim("Role", position.PositionName),
-                new Claim("AccountId",user.AccountId.ToString())  
+                new Claim("Role", user.PositionId.ToString()),
+                new Claim("AccountId",user.AccountId.ToString()),
+                new Claim("DepartmentId",user.DepartmentId.ToString()),
+                new Claim("CompanyId",user.CompanyId.ToString())  
             };
 
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
@@ -48,11 +47,13 @@ namespace dotnet.Sevices.TokenService
             var data = new JwtSecurityToken(token).Claims;
             var user =  new AccountViewModels
                 {
-                   Name = data.FirstOrDefault(o => o.Type == ClaimTypes.Name)?.Value,
-                    Email = data.FirstOrDefault(o => o.Type == ClaimTypes.NameIdentifier)?.Value,
-                    Surname = data.FirstOrDefault(o => o.Type == ClaimTypes.Surname)?.Value,
-                    PositionId = Convert.ToInt32(data.FirstOrDefault(o => o.Type == ClaimTypes.Role)?.Value),
-                    AccountId = data.FirstOrDefault(o=>o.Type== "AccountId")?.Value
+                   Name = data.FirstOrDefault(o => o.Type == "Name")?.Value,
+                    Email = data.FirstOrDefault(o => o.Type == "Email")?.Value,
+                    Surname = data.FirstOrDefault(o => o.Type == "Surname")?.Value,
+                    PositionId = Convert.ToInt32(data.FirstOrDefault(o => o.Type == "Role")?.Value),
+                    AccountId =  Convert.ToInt32(data.FirstOrDefault(o=>o.Type== "AccountId")?.Value),
+                    DepartmentId = int.Parse(data.FirstOrDefault(o=>o.Type== "DepartmentId")?.Value),
+                    CompanyId = int.Parse(data.FirstOrDefault(o=>o.Type== "CompanyId")?.Value)
                 };
              return  await Task.FromResult(user);
         }
