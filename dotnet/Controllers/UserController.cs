@@ -134,9 +134,9 @@ namespace Project_FeelMe.Controllers
         }
         [Authorize]
         [HttpPost("[action]")]
-        public async Task<IActionResult> GetUserDetail([FromBody] TokenSender.AccessToken token)
+        public async Task<IActionResult> GetUserDetail([FromHeader] string accessToken)
         {
-            var data = await _tokenService.DeCodeToken(token.accessToken);
+            var data = await _tokenService.DeCodeToken(accessToken);
               var userAccount = await (
              from account in _dbContract.Accounts
              from position in _dbContract.Positions
