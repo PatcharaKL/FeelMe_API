@@ -1,6 +1,8 @@
 
+using System.Security.Claims;
 using dotnet.Sevices.TokenService;
 using dotnet.ViewModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -132,11 +134,14 @@ namespace Project_FeelMe.Controllers
                 return UnprocessableEntity();
             }
         }
+        
         [Authorize]
         [HttpPost("[action]")]
-        public async Task<IActionResult> GetUserDetail([FromHeader] string accessToken)
+        public async Task<IActionResult> GetUserDetail()
         {
-            var data = await _tokenService.DeCodeToken(accessToken);
+            var token  = HttpContext.GetTokenAsync("access_token").Result;
+            var data = await _tokenService.DeCodeToken(token);
+            if(data==null) return Unauthorized();
               var userAccount = await (
              from account in _dbContract.Accounts
              from position in _dbContract.Positions

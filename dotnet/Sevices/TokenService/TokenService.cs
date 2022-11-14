@@ -36,7 +36,7 @@ namespace dotnet.Sevices.TokenService
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
               _config["Jwt:Audience"],
               claims,
-              expires:DateTime.Now.AddMinutes(15),
+              expires:DateTime.Now.AddSeconds(50),
               signingCredentials: credentials);
 
 
@@ -45,6 +45,12 @@ namespace dotnet.Sevices.TokenService
         public virtual async Task<AccountViewModels> DeCodeToken(string token)
         {
             var data = new JwtSecurityToken(token).Claims;
+            var exp = int.Parse(data.FirstOrDefault(o => o.Type == "exp")?.Value);
+            DateTimeOffset expires = DateTimeOffset.FromUnixTimeSeconds(exp).ToLocalTime();
+            if(expires<DateTime.Now)
+            {
+                return null;
+            }
             var user =  new AccountViewModels
                 {
                    Name = data.FirstOrDefault(o => o.Type == "Name")?.Value,
