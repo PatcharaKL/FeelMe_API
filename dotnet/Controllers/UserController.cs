@@ -58,7 +58,7 @@ namespace Project_FeelMe.Controllers
             {
                 var user = await _tokenService.DeCodeToken(token.accessToken);
                 var refreshTokenOut = await (from reToken in _dbContract.RefreshTokens
-                                             where (reToken.AccountId == int.Parse(user.AccountId)) && (reToken.IsValid == true)
+                                             where (reToken.AccountId == user.AccountId) && (reToken.IsValid == true)
                                              select new RefreshToken
                                              {
                                                  refreshToken = reToken.refreshToken,
@@ -131,6 +131,33 @@ namespace Project_FeelMe.Controllers
             {
                 return UnprocessableEntity();
             }
+        }
+        [Authorize]
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetUserDetail([FromBody] TokenSender.AccessToken token)
+        {
+            var data = await _tokenService.DeCodeToken(token.accessToken);
+              var userAccount = await (
+             from account in _dbContract.Accounts
+             from position in _dbContract.Positions
+             from depatrtment in _dbContract.Departments
+             from company in _dbContract.Companies
+             where (account.Email == data.Email)
+                    &&(position.PositionId == data.PositionId)
+                    &&(depatrtment.DepartmentId == data.DepartmentId)
+                    &&(company.CompanyId == data.CompanyId)
+             select new UserDetail
+             {
+                 Email = account.Email,
+                 Name = account.Name,
+                 Surname = account.Surname,
+                 Hp = account.Hp,
+                 Level = account.Level,
+                 PositionName = position.PositionName,
+                 DepartmentName = depatrtment.DepartmentName,
+                 CompanyName = company.Name
+             }).FirstOrDefaultAsync();
+            return Ok(userAccount);
         }
       
         private async Task<Account> Authenticate(UserLogin userLogin)
