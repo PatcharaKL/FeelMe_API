@@ -1,4 +1,6 @@
 using System.Text;
+using dotnet.Data.DataSevices.AccountDataService;
+using dotnet.Data.DataSevices.RefreshTokenDataService;
 using dotnet.Sevices.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +19,8 @@ builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IPassWordService,PassWordService>();
 builder.Services.AddTransient<ITokenService,TokenService>();
+builder.Services.AddTransient<IRefreshTokenDataService,RefreshTokenDataService>();
+builder.Services.AddTransient<IAccountDataService,AccountDataService>();
  builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
  builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
