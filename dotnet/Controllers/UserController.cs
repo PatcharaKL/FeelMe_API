@@ -27,8 +27,8 @@ namespace Project_FeelMe.Controllers
         public UserController
         (
             ITokenService tokenService, IPassWordService passWordService,
-            FeelMeContext dbContract,RefreshTokenDataService refreshTokenDataService,
-            AccountDataService accountDataService
+            FeelMeContext dbContract,IRefreshTokenDataService refreshTokenDataService,
+            IAccountDataService accountDataService
         )
         {
             _tokenService = tokenService;
