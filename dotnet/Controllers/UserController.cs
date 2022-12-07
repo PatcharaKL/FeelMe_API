@@ -1,5 +1,7 @@
 
 using System.Security.Claims;
+using dotnet.Data.DataSevices.AccountDataService;
+using dotnet.Data.DataSevices.RefreshTokenDataService;
 using dotnet.Sevices.TokenService;
 using dotnet.ViewModel;
 using Microsoft.AspNetCore.Authentication;
@@ -18,16 +20,25 @@ namespace Project_FeelMe.Controllers
     {
         private readonly ITokenService _tokenService;
         private readonly IPassWordService _passwordService;
+        private readonly IRefreshTokenDataService _refreshTokenDataService;
+        private readonly IAccountDataService _accountDataService;
         private readonly FeelMeContext _dbContract;
 
-        public UserController(ITokenService tokenService, IPassWordService passWordService, FeelMeContext dbContract)
+        public UserController
+        (
+            ITokenService tokenService, IPassWordService passWordService,
+            FeelMeContext dbContract,RefreshTokenDataService refreshTokenDataService,
+            AccountDataService accountDataService
+        )
         {
             _tokenService = tokenService;
             _passwordService = passWordService;
             _dbContract = dbContract;
+            _refreshTokenDataService = refreshTokenDataService;
+            _accountDataService = accountDataService;
         }
         [AllowAnonymous]
-        [HttpPost("UserLogin")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> UserLogin([FromBody] UserLogin userLogin)
         {
             try
@@ -41,8 +52,7 @@ namespace Project_FeelMe.Controllers
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
                     };
-                    // var accessToken = await _tokenService.GeneraterTokenAccess(user);
-                    // var refreshToken = await _tokenService.GeneraterRefreshToken();
+
                     return Ok(result);
                 }
             }
@@ -53,24 +63,14 @@ namespace Project_FeelMe.Controllers
 
             return Unauthorized("User not found");
         }
-        [HttpPost("UserLogOut")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> UserLogOut([FromBody] ResultToken token)
         {
             try
             {
                 var user = await _tokenService.DeCodeToken(token.accessToken);
-                var refreshTokenOut = await (from reToken in _dbContract.RefreshTokens
-                                             where (reToken.AccountId == user.AccountId) && (reToken.IsValid == true)
-                                             select new RefreshToken
-                                             {
-                                                 refreshToken = reToken.refreshToken,
-                                                 AccountId = reToken.AccountId,
-                                                 Exp = reToken.Exp,
-                                                 IsValid = false
-                                             }
-                                           ).FirstOrDefaultAsync();
-                _dbContract.Update(refreshTokenOut);
-                await _dbContract.SaveChangesAsync();
+                var refreshToken = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(token.refreshToken);
+                await  _refreshTokenDataService.UpdateRefreshTokenAsync(refreshToken);
                 return Ok("Success");
             }
             catch (Exception)
@@ -79,48 +79,26 @@ namespace Project_FeelMe.Controllers
             }
 
         }
-        [HttpPost("NewTokenByRefreshToken")]
+        [HttpPost("[action]")]
         public async Task<IActionResult> NewTokenByRefreshToken([FromBody] ResultToken resultToken)
         {
-            try
+            var refTokenLists = await _refreshTokenDataService.GetAllRefreshTokenAsync();
+            var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
+            if(refreshTokenCk.Exp < DateTime.Now)
             {
-                var refreshTokenCk = await (from refreshToken in _dbContract.RefreshTokens
-                                            where refreshToken.refreshToken == resultToken.refreshToken
-                                            select new RefreshToken
-                                            {
-                                                refreshToken = refreshToken.refreshToken,
-                                                AccountId = refreshToken.AccountId,
-                                                Exp = refreshToken.Exp,
-                                                IsValid = refreshToken.IsValid
-                                            }).FirstOrDefaultAsync();
-                if (refreshTokenCk.IsValid == true)
+                            await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
+                            return  Unauthorized("ReToken is Exp");
+            }
+           else if (refreshTokenCk.IsValid == true )
+            {
+                foreach(RefreshToken re in refTokenLists)
                 {
-                    RefreshToken refreshTokenUpdate = new RefreshToken
-                    {
-                        refreshToken = refreshTokenCk.refreshToken,
-                        AccountId = refreshTokenCk.AccountId,
-                        Exp = refreshTokenCk.Exp,
-                        IsValid = false
-                    };
-                    _dbContract.Update(refreshTokenUpdate);
-                    await _dbContract.SaveChangesAsync();
+                      if (re.AccountId == refreshTokenCk.AccountId)
+                   {
+                           await _refreshTokenDataService.UpdateRefreshTokenAsync(re);
+                     }
                 }
-                var userAccount = await (
-                                          from account in _dbContract.Accounts
-                                          where (account.AccountId == refreshTokenCk.AccountId)
-                                          select new Account
-                                          {
-                                              AccountId = account.AccountId,
-                                              Email = account.Email,
-                                              PasswordHash = account.PasswordHash,
-                                              Name = account.Name,
-                                              Surname = account.Surname,
-                                              Hp = account.Hp,
-                                              Level = account.Level,
-                                              PositionId = account.PositionId,
-                                              DepartmentId = account.DepartmentId,
-                                              CompanyId = account.CompanyId
-                                          }).FirstOrDefaultAsync();
+                var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
                 var newResultToken = new ResultToken
                 {
                     accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
@@ -129,10 +107,7 @@ namespace Project_FeelMe.Controllers
 
                 return Ok(newResultToken);
             }
-            catch(Exception)
-            {
-                return UnprocessableEntity();
-            }
+            else return Unauthorized();
         }
         
         [Authorize]
@@ -142,48 +117,13 @@ namespace Project_FeelMe.Controllers
             var token  = HttpContext.GetTokenAsync("access_token").Result;
             var data = await _tokenService.DeCodeToken(token);
             if(data==null) return Unauthorized();
-              var userAccount = await (
-             from account in _dbContract.Accounts
-             from position in _dbContract.Positions
-             from depatrtment in _dbContract.Departments
-             from company in _dbContract.Companies
-             where (account.Email == data.Email)
-                    &&(position.PositionId == data.PositionId)
-                    &&(depatrtment.DepartmentId == data.DepartmentId)
-                    &&(company.CompanyId == data.CompanyId)
-             select new UserDetail
-             {
-                 Email = account.Email,
-                 Name = account.Name,
-                 Surname = account.Surname,
-                 Hp = account.Hp,
-                 Level = account.Level,
-                 PositionName = position.PositionName,
-                 DepartmentName = depatrtment.DepartmentName,
-                 CompanyName = company.Name
-             }).FirstOrDefaultAsync();
+              var userAccount = await _accountDataService.GetUserDetailAsync(data);
             return Ok(userAccount);
         }
       
         private async Task<Account> Authenticate(UserLogin userLogin)
         {
-           
-            var userAccount = await (
-             from account in _dbContract.Accounts
-             where (account.Email == userLogin.Email)
-             select new Account
-             {
-                 AccountId = account.AccountId,
-                 Email = account.Email,
-                 PasswordHash = account.PasswordHash,
-                 Name = account.Name,
-                 Surname = account.Surname,
-                 Hp = account.Hp,
-                 Level = account.Level,
-                 PositionId = account.PositionId,
-                 DepartmentId = account.DepartmentId,
-                 CompanyId = account.CompanyId
-             }).FirstOrDefaultAsync();
+            var userAccount = await _accountDataService.GetAccountByEmailAsync(userLogin.Email);
               var ckPasswordHash = await _passwordService.CheckPassword(userLogin.Password,userAccount.PasswordHash);
             if (ckPasswordHash == true) return userAccount;
             else return null;
