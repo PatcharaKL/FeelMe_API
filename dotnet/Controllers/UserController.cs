@@ -131,8 +131,8 @@ namespace Project_FeelMe.Controllers
             }
             catch(Exception)
             {
-                return UnprocessableEntity();
-            }
+                return UnprocessableEntity();                                        
+             }
         }
         
         [Authorize]
