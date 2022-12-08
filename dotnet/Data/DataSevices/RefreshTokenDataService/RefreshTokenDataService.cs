@@ -40,16 +40,8 @@ namespace dotnet.Data.DataSevices.RefreshTokenDataService
             }
              public virtual async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
              {
-                RefreshToken refreshTokenUpdate = new RefreshToken
-                         {
-                              refreshToken = refreshToken.refreshToken,
-                              AccountId = refreshToken.AccountId,
-                              Exp = refreshToken.Exp,
-                              IsValid = false
-                         };
-                            _dbContract.Update(refreshTokenUpdate);
+                            _dbContract.Update(refreshToken);
                             await _dbContract.SaveChangesAsync();
-              
              }  
     }
 }

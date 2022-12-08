@@ -70,6 +70,7 @@ namespace Project_FeelMe.Controllers
             {
                 var user = await _tokenService.DeCodeToken(token.accessToken);
                 var refreshToken = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(token.refreshToken);
+                refreshToken.IsValid = false;
                 await  _refreshTokenDataService.UpdateRefreshTokenAsync(refreshToken);
                 return Ok("Success");
             }
@@ -86,8 +87,9 @@ namespace Project_FeelMe.Controllers
             var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
             if(refreshTokenCk.Exp < DateTime.Now)
             {
-                            await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
-                            return  Unauthorized("ReToken is Exp");
+                refreshTokenCk.IsValid = false;                
+                await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
+                 return  Unauthorized("ReToken is Exp");
             }
            else if (refreshTokenCk.IsValid == true )
             {
@@ -107,12 +109,7 @@ namespace Project_FeelMe.Controllers
 
                 return Ok(newResultToken);
             }
-
-            
             else return Unauthorized();
-
-     
-
         }
         
         [Authorize]

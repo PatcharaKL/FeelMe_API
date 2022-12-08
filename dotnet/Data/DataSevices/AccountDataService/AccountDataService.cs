@@ -77,5 +77,10 @@ namespace dotnet.Data.DataSevices.AccountDataService
                                                  }).FirstOrDefaultAsync();
                     return data;
                }
+               public virtual async Task UpdateAsync(Account data)
+               {
+                      _dbContract.Update(data);
+                      await _dbContract.SaveChangesAsync();
+               }
     }
 }
