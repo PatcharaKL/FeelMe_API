@@ -35,7 +35,7 @@ namespace dotnet.Controllers
             }
             catch(Exception e)
             {
-                return Unauthorized(e.Message);
+                return UnprocessableEntity(e.Message);
             }
            
           }
