@@ -96,7 +96,7 @@ namespace Project_FeelMe.Controllers
                 foreach(RefreshToken re in refTokenLists)
                 {
                       if (re.AccountId == refreshTokenCk.AccountId)
-                   {
+                   {       re.IsValid = false;
                            await _refreshTokenDataService.UpdateRefreshTokenAsync(re);
                      }
                 }
