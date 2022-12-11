@@ -42,24 +42,17 @@ namespace Project_FeelMe.Controllers
             try
             {
                 var user = await Authenticate(userLogin);
-
-                if (user != null)
-                {
                     var result = new ResultToken.TokenSender
                     {
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
                     };
-
                     return Ok(result);
-                }
             }
             catch (Exception)
             {
                 return Unauthorized("User not found");
             }
-
-            return Unauthorized("User not found");
         }
         [Authorize]
         [HttpPost("[action]")]
@@ -83,28 +76,35 @@ namespace Project_FeelMe.Controllers
         [HttpPost("[action]")]
         public async Task<IActionResult> NewTokenByRefreshToken([FromBody] ResultToken.RefreshToken resultToken)
         {
-          
-            var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
-            if (refreshTokenCk.IsValid == true || refreshTokenCk.Exp > DateTime.Now)
+            try
             {
-                var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
-                var s = new List<RefreshToken>();
-                foreach(RefreshToken re in refTokenLists)
+                var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
+                if (refreshTokenCk.IsValid == true && refreshTokenCk.Exp > DateTime.Now)
                 {
-                       re.IsValid = false;
-                       s.Add(re);
-                }
-                await _refreshTokenDataService.UpdateRefreshTokenAsync(s);
-                var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
-                var newResultToken = new ResultToken.TokenSender
-                {
-                    accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
-                    refreshToken = await _tokenService.GeneraterRefreshToken(userAccount)
-                };
+                        var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
+                        var s = new List<RefreshToken>();
+                        foreach(RefreshToken re in refTokenLists)
+                        {
+                            re.IsValid = false;
+                            s.Add(re);
+                        }
+                        await _refreshTokenDataService.UpdateRefreshTokenAsync(s);
+                        var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
+                        var newResultToken = new ResultToken.TokenSender
+                        {
+                            accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
+                            refreshToken = await _tokenService.GeneraterRefreshToken(userAccount)
+                        };
 
-                return Ok(newResultToken);
+                        return Ok(newResultToken);
+                }
+                else return Unauthorized("ReToken is Exp");
+            }catch(Exception)
+            {
+                return UnprocessableEntity();
             }
-            else return Unauthorized("ReToken is Exp");
+            
+            
         }
 
         [HttpPost("[action]")]
