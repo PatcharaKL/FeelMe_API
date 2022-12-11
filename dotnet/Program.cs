@@ -1,6 +1,11 @@
 using System.Text;
 using dotnet.Data.DataSevices.AccountDataService;
+using dotnet.Data.DataSevices.BoardDataService;
+using dotnet.Data.DataSevices.CommentDataService;
+using dotnet.Data.DataSevices.CompanyDataService;
+using dotnet.Data.DataSevices.DepartmentDataService;
 using dotnet.Data.DataSevices.LogDataService;
+using dotnet.Data.DataSevices.PositionDataService;
 using dotnet.Data.DataSevices.RefreshTokenDataService;
 using dotnet.Sevices.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -23,8 +28,13 @@ builder.Services.AddTransient<ITokenService,TokenService>();
 builder.Services.AddTransient<IRefreshTokenDataService,RefreshTokenDataService>();
 builder.Services.AddTransient<IAccountDataService,AccountDataService>();
 builder.Services.AddTransient<ILogDataService,LogDataService>();
- builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
- builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddTransient<IBoardDataService,BoardDataService>();
+builder.Services.AddTransient<ICommentDataService,CommentDataService>();
+builder.Services.AddTransient<ICompanyDataService,ICompanyDataService>();
+builder.Services.AddTransient<IDepartmentDataSerice,IDepartmentDataSerice>();
+builder.Services.AddTransient<IPositionDataService,IPositionDataService>();
+builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
