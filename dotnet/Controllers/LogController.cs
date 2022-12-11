@@ -10,7 +10,7 @@ using Project_FeelMe.Models;
 
 namespace dotnet.Controllers
 {
-    [Authorize]
+   
     [ApiController]
     [Route("[controller]")]
     public class LogController : ControllerBase
@@ -29,6 +29,7 @@ namespace dotnet.Controllers
           }
     
           [HttpPost("[action]")]
+          [Authorize]
           public async Task<IActionResult> AttackDamage([FromBody] LogSender  logSender)
           {
             

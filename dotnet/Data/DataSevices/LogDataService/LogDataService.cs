@@ -19,16 +19,7 @@ namespace dotnet.Data.DataSevices.LogDataService
             }
              public virtual async Task<List<Log>> GetAllLogDetailByAccountIdAsync(int accountId)
             {
-                var data = await( from logs in _dbContract.Logs
-                                                         where logs.AccountId == accountId
-                                                         select new Log
-                                                         {
-                                                           LogId = logs.LogId,
-                                                           Type = logs.Type,
-                                                           Amount = logs.Amount,
-                                                           Datetime = logs.Datetime,
-                                                           AccountId = logs.AccountId
-                                                         }).ToListAsync();
+                var data = await _dbContract.Logs.Where(logs => logs.AccountId == accountId).ToListAsync();
                 return data;
             }
             public virtual async Task SaveLogAsync(Log data)

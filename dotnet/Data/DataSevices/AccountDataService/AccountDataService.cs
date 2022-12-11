@@ -20,6 +20,7 @@ namespace dotnet.Data.DataSevices.AccountDataService
              }
               public virtual async Task<UserDetail> GetUserDetailAsync(AccountViewModels data)
               {
+                    
                      var newData = await (
                                                  from account in _dbContract.Accounts
                                                  from position in _dbContract.Positions
