@@ -34,6 +34,7 @@ namespace dotnet.Controllers
           {
                  var token  = HttpContext.GetTokenAsync("access_token").Result;
                  var data = await _tokenService.DeCodeToken(token);
+                 if(data == null) return Unauthorized();
                  Log dataLog = new Log
                  {
                     AccountId = data.AccountId,
