@@ -45,7 +45,7 @@ namespace Project_FeelMe.Controllers
 
                 if (user != null)
                 {
-                    var result = new ResultToken
+                    var result = new ResultToken.TokenSender
                     {
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
@@ -94,13 +94,15 @@ namespace Project_FeelMe.Controllers
            else if (refreshTokenCk.IsValid == true )
             {
                 var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
+                var s = new List<RefreshToken>();
                 foreach(RefreshToken re in refTokenLists)
                 {
                        re.IsValid = false;
-                       await _refreshTokenDataService.UpdateRefreshTokenAsync(re);
+                       s.Add(re);
                 }
+                await _refreshTokenDataService.UpdateRefreshTokenAsync(s);
                 var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
-                var newResultToken = new ResultToken
+                var newResultToken = new ResultToken.TokenSender
                 {
                     accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
                     refreshToken = await _tokenService.GeneraterRefreshToken(userAccount)
