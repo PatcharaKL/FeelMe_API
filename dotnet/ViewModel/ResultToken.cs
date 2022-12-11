@@ -4,13 +4,19 @@ namespace dotnet.ViewModel
     {
         public ResultToken()
         {
-            refreshTokens =  new List<RefreshToken>();
-            accessTokens = new List<AccessToken>();
+            refreshTokens =  new RefreshToken();
+            accessTokens = new AccessToken();
+            resulToken = new TokenSender();
         }
-        public string accessToken{get;set;}
-        public string refreshToken{get;set;}
-        public List<RefreshToken> refreshTokens{get;set;}
-        public List<AccessToken> accessTokens{get;set;}
+     
+        public RefreshToken refreshTokens{get;set;}
+        public AccessToken accessTokens{get;set;}
+        public TokenSender resulToken{get;set;}
+        public class TokenSender
+        {
+               public string accessToken{get;set;}
+               public string refreshToken{get;set;}
+        }
         public class RefreshToken
         {
             public string refreshToken{get;set;}
