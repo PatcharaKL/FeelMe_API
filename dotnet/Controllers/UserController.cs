@@ -85,13 +85,7 @@ namespace Project_FeelMe.Controllers
         {
           
             var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
-            if(refreshTokenCk.Exp < DateTime.Now)
-            {
-                refreshTokenCk.IsValid = false;                
-                await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
-                 return  Unauthorized("ReToken is Exp");
-            }
-           else if (refreshTokenCk.IsValid == true )
+            if (refreshTokenCk.IsValid == true || refreshTokenCk.Exp > DateTime.Now)
             {
                 var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
                 var s = new List<RefreshToken>();
@@ -110,7 +104,7 @@ namespace Project_FeelMe.Controllers
 
                 return Ok(newResultToken);
             }
-            else return Unauthorized();
+            else return Unauthorized("ReToken is Exp");
         }
 
         [HttpPost("[action]")]
