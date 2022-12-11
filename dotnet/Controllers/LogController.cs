@@ -31,6 +31,7 @@ namespace dotnet.Controllers
           [HttpPost("[action]")]
           public async Task<IActionResult> AttackDamage([FromBody] LogSender  logSender)
           {
+            
             try
             {
                  var token  = HttpContext.GetTokenAsync("access_token").Result;
@@ -43,10 +44,15 @@ namespace dotnet.Controllers
                     Amount = logSender.amount
                  };
                  var userUpdate = await _accountDataService.GetAccountByAccountIdAsync(dataLog.AccountId);
-                 await _logDataService.SaveLogAsync(dataLog);
-                 userUpdate.Hp -= dataLog.Amount;
-                 await _accountDataService.UpdateAsync(userUpdate);
-                 return Ok("Success");
+                 if(userUpdate.Hp-logSender.amount>=0)
+                 {
+                     await _logDataService.SaveLogAsync(dataLog);
+                     userUpdate.Hp -= dataLog.Amount;
+                     await _accountDataService.UpdateAccountAsync(userUpdate);
+                     return Ok("Success");
+                 }
+                 else return  UnprocessableEntity("Health Point is Negative");
+                
             }
             catch(Exception e)
             {

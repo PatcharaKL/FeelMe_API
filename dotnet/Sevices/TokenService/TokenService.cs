@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using dotnet.Data.DataSevices.RefreshTokenDataService;
 using dotnet.ViewModel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -12,11 +13,13 @@ namespace dotnet.Sevices.TokenService
     public class TokenService:ITokenService
     {
           private readonly IConfiguration _config;
-           private readonly FeelMeContext _dbContract;
-            public TokenService(IConfiguration config,FeelMeContext dbContract)
+          private readonly FeelMeContext _dbContract;
+          private readonly IRefreshTokenDataService _refreshTokenDataService;
+            public TokenService(IConfiguration config,FeelMeContext dbContract,IRefreshTokenDataService refreshTokenDataService)
             {
                  _config = config;
                  _dbContract = dbContract;
+                 _refreshTokenDataService = refreshTokenDataService;
             }
             public virtual async Task<string> GeneraterTokenAccess(Account user)
         {
@@ -73,8 +76,7 @@ namespace dotnet.Sevices.TokenService
                      Exp = DateTime.Now.AddDays(15),
                     IsValid = true
                     };
-                     _dbContract.Add(refreshTokenAdd);
-                    await _dbContract.SaveChangesAsync();
+             await  _refreshTokenDataService.InsertAsyncRefreshToken(refreshTokenAdd);
           
             
             return await Task.FromResult<string>(refreshtoken);

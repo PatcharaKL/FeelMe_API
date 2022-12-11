@@ -15,26 +15,7 @@ namespace dotnet.Data.DataSevices.AccountDataService
             }
              public virtual async Task<Account> GetAccountByAccountIdAsync(int accountId)
              {
-                 var data = await (
-                                          from account in _dbContract.Accounts
-                                          where (account.AccountId == accountId)
-                                          select new Account
-                                          {
-                                             AccountId = account.AccountId,
-                                                       Email = account.Email,
-                                                       PasswordHash = account.PasswordHash,
-                                                       Name = account.Name,
-                                                       Surname = account.Surname,
-                                                       AvatarUrl = account.AvatarUrl,
-                                                       ApplyDate = account.ApplyDate,
-                                                       IsActive = account.IsActive,
-                                                       Hp = account.Hp,
-                                                       Level = account.Level,
-                                                       Created = account.Created,
-                                                       PositionId = account.PositionId,
-                                                       DepartmentId = account.DepartmentId,
-                                                       CompanyId = account.CompanyId
-                                          }).FirstOrDefaultAsync();
+                 var data =  await _dbContract.Accounts.FirstOrDefaultAsync(account => account.AccountId == accountId);
                 return data;
              }
               public virtual async Task<UserDetail> GetUserDetailAsync(AccountViewModels data)
@@ -63,32 +44,18 @@ namespace dotnet.Data.DataSevices.AccountDataService
               }
                public virtual async Task<Account> GetAccountByEmailAsync(string email)
                {
-                     var data = await (
-                                                  from account in _dbContract.Accounts
-                                                  where (account.Email == email)
-                                                  select new Account
-                                                 {
-                                                     AccountId = account.AccountId,
-                                                       Email = account.Email,
-                                                       PasswordHash = account.PasswordHash,
-                                                       Name = account.Name,
-                                                       Surname = account.Surname,
-                                                       AvatarUrl = account.AvatarUrl,
-                                                       ApplyDate = account.ApplyDate,
-                                                       IsActive = account.IsActive,
-                                                       Hp = account.Hp,
-                                                       Level = account.Level,
-                                                       Created = account.Created,
-                                                       PositionId = account.PositionId,
-                                                       DepartmentId = account.DepartmentId,
-                                                       CompanyId = account.CompanyId
-                                                 }).FirstOrDefaultAsync();
+                     var data = await _dbContract.Accounts.FirstOrDefaultAsync(account => account.Email == email);
                     return data;
                }
-               public virtual async Task UpdateAsync(Account data)
+               public virtual async Task UpdateAccountAsync(Account data)
                {
                       _dbContract.Update(data);
                       await _dbContract.SaveChangesAsync();
                }
+                public virtual async Task InsertAccountAsync(Account data)
+             {
+                _dbContract.Add(data);
+                await _dbContract.SaveChangesAsync();
+             }
     }
 }
