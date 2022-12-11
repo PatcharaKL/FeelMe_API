@@ -8,39 +8,39 @@ namespace dotnet.Data.DataSevices.DepartmentDataService
     {
         private readonly FeelMeContext _dbContract;
 
-        public DepartmentDataSerice(FeelMeContext dbContract)
+        public  DepartmentDataSerice(FeelMeContext dbContract)
         {
             _dbContract = dbContract;
         }
-        public async Task<List<Department>> GetAllDepartmentAsync()
+        public virtual async Task<List<Department>> GetAllDepartmentAsync()
         {
             return await _dbContract.Departments.ToListAsync();
         }
 
-        public async Task<Department> GetDepartmentByIdAsync(int id)
+        public virtual async Task<Department> GetDepartmentByIdAsync(int id)
         {
            return await _dbContract.Departments.FirstOrDefaultAsync(department => department.DepartmentId == id);
         }
 
-        public async Task InsertDepartmentAsync(Department department)
+        public virtual async Task InsertDepartmentAsync(Department department)
         {
             _dbContract.Add(department);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task InsertDepartmentAsync(List<Department> department)
+        public virtual async Task InsertDepartmentAsync(List<Department> department)
         {
            _dbContract.AddRange(department);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task UpdateDepartmentAsync(List<Department> department)
+        public virtual async Task UpdateDepartmentAsync(List<Department> department)
         {
             _dbContract.UpdateRange(department);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task UpdateDepartmentsAsync(Department department)
+        public virtual async Task UpdateDepartmentsAsync(Department department)
         {
             _dbContract.Update(department);
             await _dbContract.SaveChangesAsync();
