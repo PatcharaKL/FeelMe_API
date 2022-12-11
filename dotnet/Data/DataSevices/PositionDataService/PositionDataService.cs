@@ -12,35 +12,35 @@ namespace dotnet.Data.DataSevices.PositionDataService
         {
             _dbContract = dbContract;
         }
-        public async Task<List<Position>> GetAllPositionAsync()
+        public virtual async Task<List<Position>> GetAllPositionAsync()
         {
             return await _dbContract.Positions.ToListAsync();
         }
 
-        public async Task<Position> GetPositionByIdAsync(int id)
+        public virtual async Task<Position> GetPositionByIdAsync(int id)
         {
            return await _dbContract.Positions.FirstOrDefaultAsync(position => position.PositionId == id);
         }
 
-        public async Task InsertPositionAsync(Position position)
+        public virtual async Task InsertPositionAsync(Position position)
         {
             _dbContract.Add(position);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task InsertPositionAsync(List<Position> position)
+        public virtual async Task InsertPositionAsync(List<Position> position)
         {
            _dbContract.AddRange(position);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task UpdatePositionAsync(List<Position> position)
+        public virtual async Task UpdatePositionAsync(List<Position> position)
         {
             _dbContract.UpdateRange(position);
             await _dbContract.SaveChangesAsync();
         }
 
-        public async Task UpdatePositionsAsync(Position position)
+        public virtual async Task UpdatePositionsAsync(Position position)
         {
             _dbContract.Update(position);
             await _dbContract.SaveChangesAsync();

@@ -32,9 +32,10 @@ namespace dotnet.Controllers
           [Authorize]
           public async Task<IActionResult> AttackDamage([FromBody] LogSender  logSender)
           {
+             try
+             {
                  var token  = HttpContext.GetTokenAsync("access_token").Result;
                  var data = await _tokenService.DeCodeToken(token);
-                 if(data == null) return Unauthorized();
                  Log dataLog = new Log
                  {
                     AccountId = data.AccountId,
@@ -51,7 +52,50 @@ namespace dotnet.Controllers
                      return Ok("Success");
                  }
                  else return  UnprocessableEntity("Health Point is Negative");
+             }
+             catch(Exception)
+             {
+                return Unauthorized();
+             }
           }
-
+          [HttpPost("[action]")]
+          [Authorize]
+           public async Task<IActionResult> HealingUpSender([FromBody] LogSender  logSender)
+           {
+             try
+             {
+                var token  = HttpContext.GetTokenAsync("access_token").Result;
+                var data = await _tokenService.DeCodeToken(token);
+                 Log dataLog = new Log
+                 {
+                    AccountId = data.AccountId,
+                    Datetime = DateTime.Now,
+                    Type = logSender.type,
+                    Amount = logSender.amount
+                 };
+                 await _logDataService.SaveLogAsync(dataLog);
+                return Ok("Success");
+             }
+             catch(Exception)
+             {
+               return Unauthorized();
+             }
+           }
+          [HttpPost("[action]")]
+          [Authorize]
+           public async Task<IActionResult> HealingUp([FromBody] LogSender  logSender)
+           {
+             try
+             {
+                var token  = HttpContext.GetTokenAsync("access_token").Result;
+                var data = await _tokenService.DeCodeToken(token);
+                 
+                return Ok("Success");
+             }
+             catch(Exception)
+             {
+               return Unauthorized();
+             }
+           }
     }
 }

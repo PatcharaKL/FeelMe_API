@@ -10,5 +10,6 @@ namespace dotnet.Data.DataSevices.AccountDataService
          Task<Account> GetAccountByEmailAsync(string email);
          Task UpdateAccountAsync(Account data);
          Task InsertAccountAsync(Account data);
+         Task<List<UserDetail>> GetDetailEnemyAsync(int accountId);
     }
 }

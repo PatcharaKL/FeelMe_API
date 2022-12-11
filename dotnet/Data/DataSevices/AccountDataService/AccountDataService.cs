@@ -43,6 +43,30 @@ namespace dotnet.Data.DataSevices.AccountDataService
                                              }).FirstOrDefaultAsync();
                     return newData;
               }
+              public virtual async Task<List<UserDetail>> GetDetailEnemyAsync(int accountId)
+              {
+                     var newData = await (
+                                                 from account in _dbContract.Accounts
+                                                 from position in _dbContract.Positions
+                                                 from depatrtment in _dbContract.Departments
+                                                 from company in _dbContract.Companies
+                                                 where (account.AccountId != accountId) 
+                                                     &&(position.PositionId == account.PositionId)
+                                                     &&(depatrtment.DepartmentId == account.DepartmentId)
+                                                     &&(company.CompanyId == account.CompanyId)
+                                                select new UserDetail
+                                             {
+                                                 Email = account.Email,
+                                                 Name = account.Name,
+                                                 Surname = account.Surname,
+                                                 Hp = account.Hp,
+                                                 Level = account.Level,
+                                                 PositionName = position.PositionName,
+                                                 DepartmentName = depatrtment.DepartmentName,
+                                                 CompanyName = company.Name
+                                             }).ToListAsync();
+                    return newData;
+              }
                public virtual async Task<Account> GetAccountByEmailAsync(string email)
                {
                      var data = await _dbContract.Accounts.FirstOrDefaultAsync(account => account.Email == email);

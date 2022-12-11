@@ -113,6 +113,12 @@ namespace Project_FeelMe.Controllers
             var data =  await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(accountId); 
             return Ok(data);
         }
+         [HttpPost("[action]")]
+        public async Task<IActionResult> GetEnamyDetail()
+        {
+            var data =  await _accountDataService.GetDetailEnemyAsync(2); 
+            return Ok(data);
+        }
         [Authorize]
         [HttpPost("[action]")]
         public async Task<IActionResult> GetUserDetail()

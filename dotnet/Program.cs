@@ -30,9 +30,9 @@ builder.Services.AddTransient<IAccountDataService,AccountDataService>();
 builder.Services.AddTransient<ILogDataService,LogDataService>();
 builder.Services.AddTransient<IBoardDataService,BoardDataService>();
 builder.Services.AddTransient<ICommentDataService,CommentDataService>();
-builder.Services.AddTransient<ICompanyDataService,ICompanyDataService>();
-builder.Services.AddTransient<IDepartmentDataSerice,IDepartmentDataSerice>();
-builder.Services.AddTransient<IPositionDataService,IPositionDataService>();
+builder.Services.AddTransient<ICompanyDataService,CompanyDataService>();
+builder.Services.AddTransient<IDepartmentDataSerice,DepartmentDataSerice>();
+builder.Services.AddTransient<IPositionDataService,PositionDataService>();
 builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
