@@ -32,9 +32,6 @@ namespace dotnet.Controllers
           [Authorize]
           public async Task<IActionResult> AttackDamage([FromBody] LogSender  logSender)
           {
-            
-            try
-            {
                  var token  = HttpContext.GetTokenAsync("access_token").Result;
                  var data = await _tokenService.DeCodeToken(token);
                  Log dataLog = new Log
@@ -53,13 +50,6 @@ namespace dotnet.Controllers
                      return Ok("Success");
                  }
                  else return  UnprocessableEntity("Health Point is Negative");
-                
-            }
-            catch(Exception e)
-            {
-                return UnprocessableEntity(e.Message);
-            }
-           
           }
 
     }
