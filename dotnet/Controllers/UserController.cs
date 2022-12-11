@@ -114,9 +114,9 @@ namespace Project_FeelMe.Controllers
         }
 
         [HttpPost("[action]")]
-        public async Task<IActionResult> GetRefreshTokenDetail()
+        public async Task<IActionResult> GetRefreshTokenDetail(int accountId)
         {
-            var data =  await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(1); 
+            var data =  await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(accountId); 
             return Ok(data);
         }
         [Authorize]
@@ -132,7 +132,7 @@ namespace Project_FeelMe.Controllers
       
         private async Task<Account> Authenticate(UserLogin userLogin)
         {
-            var userAccount = await _accountDataService.GetAccountByEmailAsync(userLogin.Email);
+              var userAccount = await _accountDataService.GetAccountByEmailAsync(userLogin.Email);
               var ckPasswordHash = await _passwordService.CheckPassword(userLogin.Password,userAccount.PasswordHash);
             if (ckPasswordHash == true) return userAccount;
             else return null;
