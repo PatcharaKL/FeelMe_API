@@ -15,33 +15,27 @@ namespace dotnet.Data.DataSevices.RefreshTokenDataService
 
             public virtual async Task<List<RefreshToken>> GetAllRefreshTokenAsync()
             {
-                var data = await( from refreshTokens in _dbContract.RefreshTokens
-                                                         select new RefreshToken
-                                                         {
-                                                            refreshToken = refreshTokens.refreshToken,
-                                                            AccountId = refreshTokens.AccountId,
-                                                            Exp = refreshTokens.Exp,
-                                                            IsValid = refreshTokens.IsValid
-                                                         }).ToListAsync();
+                var data = await _dbContract.RefreshTokens.ToListAsync();
                 return data;
+            }
+            public  virtual async Task<List<RefreshToken>> GetRefreshTokenListByAccountIdAsync(int accountId )
+            {
+                return await _dbContract.RefreshTokens.Where(refreshToken => refreshToken.AccountId == accountId && refreshToken.IsValid==true).ToListAsync();
             }
             public virtual async Task<RefreshToken> GetRefreshTokenByRefreshTokenAsync(string refreshToken)
             {
-                  var data = await (from reToken in _dbContract.RefreshTokens
-                                            where reToken.refreshToken == refreshToken
-                                            select new RefreshToken
-                                            {
-                                                refreshToken = reToken.refreshToken,
-                                                AccountId = reToken.AccountId,
-                                                Exp = reToken.Exp,
-                                                IsValid = reToken.IsValid
-                                            }).FirstOrDefaultAsync();
+                  var data = await _dbContract.RefreshTokens.FirstOrDefaultAsync(reToken => reToken.refreshToken ==refreshToken);
                  return data;                      
             }
              public virtual async Task UpdateRefreshTokenAsync(RefreshToken refreshToken)
              {
-                            _dbContract.Update(refreshToken);
-                            await _dbContract.SaveChangesAsync();
+                 _dbContract.Update(refreshToken);
+                await _dbContract.SaveChangesAsync();
              }  
+             public virtual async Task InsertAsyncRefreshToken(RefreshToken refreshToken)
+             {
+                _dbContract.Add(refreshToken);
+                await _dbContract.SaveChangesAsync();
+             }
     }
 }

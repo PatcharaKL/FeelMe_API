@@ -14,15 +14,7 @@ namespace dotnet.Data.DataSevices.LogDataService
             }
              public virtual async Task<List<Log>> GetAllLogDetailAsync()
             {
-                var data = await( from logs in _dbContract.Logs
-                                                         select new Log
-                                                         {
-                                                           LogId = logs.LogId,
-                                                           Type = logs.Type,
-                                                           Amount = logs.Amount,
-                                                           Datetime = logs.Datetime,
-                                                           AccountId = logs.AccountId
-                                                         }).ToListAsync();
+                var data = await _dbContract.Logs.ToListAsync();
                 return data;
             }
              public virtual async Task<List<Log>> GetAllLogDetailByAccountIdAsync(int accountId)

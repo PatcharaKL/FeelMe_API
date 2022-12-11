@@ -22,18 +22,16 @@ namespace Project_FeelMe.Controllers
         private readonly IPassWordService _passwordService;
         private readonly IRefreshTokenDataService _refreshTokenDataService;
         private readonly IAccountDataService _accountDataService;
-        private readonly FeelMeContext _dbContract;
 
         public UserController
         (
             ITokenService tokenService, IPassWordService passWordService,
-            FeelMeContext dbContract,IRefreshTokenDataService refreshTokenDataService,
+            IRefreshTokenDataService refreshTokenDataService,
             IAccountDataService accountDataService
         )
         {
             _tokenService = tokenService;
             _passwordService = passWordService;
-            _dbContract = dbContract;
             _refreshTokenDataService = refreshTokenDataService;
             _accountDataService = accountDataService;
         }
@@ -63,15 +61,17 @@ namespace Project_FeelMe.Controllers
 
             return Unauthorized("User not found");
         }
+        [Authorize]
         [HttpPost("[action]")]
-        public async Task<IActionResult> UserLogOut([FromBody] ResultToken token)
+        public async Task<IActionResult> UserLogOut([FromBody] ResultToken.RefreshToken resultToken)
         {
             try
             {
-                var user = await _tokenService.DeCodeToken(token.accessToken);
-                var refreshToken = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(token.refreshToken);
-                refreshToken.IsValid = false;
-                await  _refreshTokenDataService.UpdateRefreshTokenAsync(refreshToken);
+                var token  = HttpContext.GetTokenAsync("access_token").Result;
+                var user = await _tokenService.DeCodeToken(token);
+                var reToken = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
+                reToken.IsValid = false;
+                await  _refreshTokenDataService.UpdateRefreshTokenAsync(reToken);
                 return Ok("Success");
             }
             catch (Exception)
@@ -81,9 +81,9 @@ namespace Project_FeelMe.Controllers
 
         }
         [HttpPost("[action]")]
-        public async Task<IActionResult> NewTokenByRefreshToken([FromBody] ResultToken resultToken)
+        public async Task<IActionResult> NewTokenByRefreshToken([FromBody] ResultToken.RefreshToken resultToken)
         {
-            var refTokenLists = await _refreshTokenDataService.GetAllRefreshTokenAsync();
+          
             var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
             if(refreshTokenCk.Exp < DateTime.Now)
             {
@@ -93,12 +93,11 @@ namespace Project_FeelMe.Controllers
             }
            else if (refreshTokenCk.IsValid == true )
             {
+                var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
                 foreach(RefreshToken re in refTokenLists)
                 {
-                      if (re.AccountId == refreshTokenCk.AccountId)
-                   {       re.IsValid = false;
-                           await _refreshTokenDataService.UpdateRefreshTokenAsync(re);
-                     }
+                       re.IsValid = false;
+                       await _refreshTokenDataService.UpdateRefreshTokenAsync(re);
                 }
                 var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
                 var newResultToken = new ResultToken
@@ -111,7 +110,13 @@ namespace Project_FeelMe.Controllers
             }
             else return Unauthorized();
         }
-        
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetRefreshTokenDetail()
+        {
+            var data =  await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(1); 
+            return Ok(data);
+        }
         [Authorize]
         [HttpPost("[action]")]
         public async Task<IActionResult> GetUserDetail()
