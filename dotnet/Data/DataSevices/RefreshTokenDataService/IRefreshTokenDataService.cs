@@ -8,7 +8,7 @@ namespace dotnet.Data.DataSevices.RefreshTokenDataService
          Task<RefreshToken> GetRefreshTokenByRefreshTokenAsync(string refreshToken);
          Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
          Task InsertAsyncRefreshToken(RefreshToken refreshToken);
-         Task<List<RefreshToken>> GetRefreshTokenListByAccountIdAsync(int accountId );
+        Task<RefreshToken> GetRefreshTokenListByAccountIdAsync(int accountId );
          Task UpdateRefreshTokenAsync(List<RefreshToken> refreshToken);
     }
 }

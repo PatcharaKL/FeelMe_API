@@ -51,7 +51,14 @@ namespace dotnet.Controllers
                      await _accountDataService.UpdateAccountAsync(userUpdate);
                      return Ok("Success");
                  }
-                 else return  UnprocessableEntity("Health Point is Negative");
+                 else
+                 {
+                     await _logDataService.SaveLogAsync(dataLog);
+                     userUpdate.Hp = 0;
+                     await _accountDataService.UpdateAccountAsync(userUpdate);
+                     return  Ok("Health Point is Negative");
+                 }
+                 
              }
              catch(Exception)
              {
