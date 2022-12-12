@@ -76,7 +76,7 @@ namespace dotnet.Sevices.TokenService
                      Exp = DateTime.Now.AddDays(15),
                     IsValid = true
                     };
-             await  _refreshTokenDataService.InsertAsyncRefreshToken(refreshTokenAdd);
+            _dbContract.RefreshTokens.Add(refreshTokenAdd);
           
             
             return await Task.FromResult<string>(refreshtoken);

@@ -19,6 +19,7 @@ namespace Project_FeelMe.Controllers
     public class UserController : ControllerBase
     {
         private readonly ITokenService _tokenService;
+        private readonly FeelMeContext _dbContract;
         private readonly IPassWordService _passwordService;
         private readonly IRefreshTokenDataService _refreshTokenDataService;
         private readonly IAccountDataService _accountDataService;
@@ -27,13 +28,15 @@ namespace Project_FeelMe.Controllers
         (
             ITokenService tokenService, IPassWordService passWordService,
             IRefreshTokenDataService refreshTokenDataService,
-            IAccountDataService accountDataService
+            IAccountDataService accountDataService,
+            FeelMeContext dbContract
         )
         {
             _tokenService = tokenService;
             _passwordService = passWordService;
             _refreshTokenDataService = refreshTokenDataService;
             _accountDataService = accountDataService;
+            _dbContract = dbContract;
         }
         [AllowAnonymous]
         [HttpPost("[action]")]
@@ -50,6 +53,7 @@ namespace Project_FeelMe.Controllers
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
                     };
+                    await _dbContract.SaveChangesAsync();
                     return Ok(result);
                 }
                 else
@@ -61,6 +65,7 @@ namespace Project_FeelMe.Controllers
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
                     };
+                    await _dbContract.SaveChangesAsync();
                    return Ok(newRefreshToken);
                 }
                    
@@ -98,13 +103,14 @@ namespace Project_FeelMe.Controllers
                 if (refreshTokenCk.IsValid == true && refreshTokenCk.Exp > DateTime.Now)
                 {
                         refreshTokenCk.IsValid = false;
-                        await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
+                        _dbContract.RefreshTokens.Update(refreshTokenCk);
                         var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
                         var newResultToken = new ResultToken.TokenSender
                         {
                             accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
                             refreshToken = await _tokenService.GeneraterRefreshToken(userAccount)
                         };
+                        await _dbContract.SaveChangesAsync();
                         return Ok(newResultToken);
                 }
                 else return Unauthorized("ReToken is Exp");
