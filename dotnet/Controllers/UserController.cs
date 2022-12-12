@@ -42,12 +42,28 @@ namespace Project_FeelMe.Controllers
             try
             {
                 var user = await Authenticate(userLogin);
-                    var result = new ResultToken.TokenSender
+                var refreshToken = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(user.AccountId);
+                if(refreshToken == null)
+                {
+                     var result = new ResultToken.TokenSender
                     {
                         accessToken = await _tokenService.GeneraterTokenAccess(user),
                         refreshToken = await _tokenService.GeneraterRefreshToken(user)
                     };
                     return Ok(result);
+                }
+                else
+                {
+                   refreshToken.IsValid = false;
+                   await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshToken);
+                   var newRefreshToken = new ResultToken.TokenSender
+                    {
+                        accessToken = await _tokenService.GeneraterTokenAccess(user),
+                        refreshToken = await _tokenService.GeneraterRefreshToken(user)
+                    };
+                   return Ok(newRefreshToken);
+                }
+                   
             }
             catch (Exception)
             {
@@ -81,21 +97,14 @@ namespace Project_FeelMe.Controllers
                 var refreshTokenCk = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
                 if (refreshTokenCk.IsValid == true && refreshTokenCk.Exp > DateTime.Now)
                 {
-                        var refTokenLists = await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(refreshTokenCk.AccountId);
-                        var s = new List<RefreshToken>();
-                        foreach(RefreshToken re in refTokenLists)
-                        {
-                            re.IsValid = false;
-                            s.Add(re);
-                        }
-                        await _refreshTokenDataService.UpdateRefreshTokenAsync(s);
+                        refreshTokenCk.IsValid = false;
+                        await _refreshTokenDataService.UpdateRefreshTokenAsync(refreshTokenCk);
                         var userAccount = await _accountDataService.GetAccountByAccountIdAsync(refreshTokenCk.AccountId);
                         var newResultToken = new ResultToken.TokenSender
                         {
                             accessToken = await _tokenService.GeneraterTokenAccess(userAccount),
                             refreshToken = await _tokenService.GeneraterRefreshToken(userAccount)
                         };
-
                         return Ok(newResultToken);
                 }
                 else return Unauthorized("ReToken is Exp");
@@ -103,8 +112,6 @@ namespace Project_FeelMe.Controllers
             {
                 return UnprocessableEntity();
             }
-            
-            
         }
 
         [HttpPost("[action]")]
