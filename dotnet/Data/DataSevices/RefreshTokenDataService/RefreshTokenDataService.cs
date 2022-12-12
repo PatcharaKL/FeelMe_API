@@ -20,7 +20,7 @@ namespace dotnet.Data.DataSevices.RefreshTokenDataService
             }
             public  virtual async Task<RefreshToken> GetRefreshTokenListByAccountIdAsync(int accountId )
             {
-                return await _dbContract.RefreshTokens.Where(refreshToken => refreshToken.AccountId == accountId && refreshToken.IsValid==true).FirstOrDefaultAsync();
+                return await _dbContract.RefreshTokens.FirstOrDefaultAsync(reToken => reToken.AccountId == accountId && reToken.IsValid == true);
             }
             public virtual async Task<RefreshToken> GetRefreshTokenByRefreshTokenAsync(string refreshToken)
             {
