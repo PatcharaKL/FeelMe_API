@@ -28,13 +28,13 @@ namespace dotnet.Data.DataSevices.DepartmentDataService
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task InsertDepartmentAsync(List<Department> department)
+        public virtual async Task InsertListDepartmentAsync(List<Department> department)
         {
            _dbContract.AddRange(department);
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateDepartmentAsync(List<Department> department)
+        public virtual async Task UpdateListDepartmentAsync(List<Department> department)
         {
             _dbContract.UpdateRange(department);
             await _dbContract.SaveChangesAsync();

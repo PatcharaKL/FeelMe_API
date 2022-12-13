@@ -7,6 +7,6 @@ namespace dotnet.Data.DataSevices.WeaponDataService
          Task<Weapon> GetWeaponByWeaponIdAsync(int id);
          Task UpdateWeaponAsync(Weapon weapon);
          Task InsertAsyncWeapon(Weapon weapon);
-         Task UpdateWeaponAsync(List<Weapon> weapon);
+         Task UpdateListWeaponAsync(List<Weapon> weapon);
     }
 }

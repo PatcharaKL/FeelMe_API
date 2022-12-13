@@ -28,13 +28,13 @@ namespace dotnet.Data.DataSevices.PositionDataService
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task InsertPositionAsync(List<Position> position)
+        public virtual async Task InsertListPositionAsync(List<Position> position)
         {
            _dbContract.AddRange(position);
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task UpdatePositionAsync(List<Position> position)
+        public virtual async Task UpdateListPositionAsync(List<Position> position)
         {
             _dbContract.UpdateRange(position);
             await _dbContract.SaveChangesAsync();
