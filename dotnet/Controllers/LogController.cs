@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Project_FeelMe.Data;
 using Project_FeelMe.Models;
+using dotnet.Data.DataSevices.WeaponDataService;
 
 namespace dotnet.Controllers
 {
@@ -18,14 +19,15 @@ namespace dotnet.Controllers
           
           private readonly ILogDataService _logDataService;
           private readonly IAccountDataService _accountDataService;
-          
+          private readonly IWeaponDataService _weaponDataService;
           private readonly ITokenService _tokenService;
 
-          public LogController(ILogDataService logDataService,IAccountDataService accountDataService,ITokenService tokenService)
+          public LogController(ILogDataService logDataService,IAccountDataService accountDataService,ITokenService tokenService,IWeaponDataService weaponDataService)
           {
             _logDataService = logDataService;
             _accountDataService = accountDataService;
             _tokenService = tokenService;
+            _weaponDataService = weaponDataService;
           }
     
           [HttpPost("[action]")]
@@ -103,6 +105,12 @@ namespace dotnet.Controllers
              {
                return Unauthorized();
              }
+           }
+         [HttpPost("[action]")]
+           public async Task<IActionResult> GetWeapons()
+           {
+               var data = await _weaponDataService.GetAllWeaponAsync();
+               return Ok(data);
            }
     }
 }

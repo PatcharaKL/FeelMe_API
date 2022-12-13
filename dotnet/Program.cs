@@ -7,6 +7,7 @@ using dotnet.Data.DataSevices.DepartmentDataService;
 using dotnet.Data.DataSevices.LogDataService;
 using dotnet.Data.DataSevices.PositionDataService;
 using dotnet.Data.DataSevices.RefreshTokenDataService;
+using dotnet.Data.DataSevices.WeaponDataService;
 using dotnet.Sevices.TokenService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ builder.Services.AddTransient<ICommentDataService,CommentDataService>();
 builder.Services.AddTransient<ICompanyDataService,CompanyDataService>();
 builder.Services.AddTransient<IDepartmentDataSerice,DepartmentDataSerice>();
 builder.Services.AddTransient<IPositionDataService,PositionDataService>();
+builder.Services.AddTransient<IWeaponDataService,WeaponDataService>();
 builder.Services.AddDbContext<FeelMeContext>(options => options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => {
