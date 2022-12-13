@@ -7,8 +7,8 @@ namespace dotnet.Data.DataSevices.PositionDataService
         Task<List<Position>> GetAllPositionAsync();
          Task<Position> GetPositionByIdAsync(int id);
          Task InsertPositionAsync(Position position);
-         Task InsertPositionAsync(List<Position> position);
+         Task InsertListPositionAsync(List<Position> position);
          Task UpdatePositionsAsync(Position position);
-         Task UpdatePositionAsync(List<Position> position);
+         Task UpdateListPositionAsync(List<Position> position);
     }
 }

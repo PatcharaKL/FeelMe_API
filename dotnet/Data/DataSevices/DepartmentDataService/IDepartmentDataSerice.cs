@@ -7,8 +7,8 @@ namespace dotnet.Data.DataSevices.DepartmentDataService
          Task<List<Department>> GetAllDepartmentAsync();
          Task<Department> GetDepartmentByIdAsync(int id);
          Task InsertDepartmentAsync(Department department);
-         Task InsertDepartmentAsync(List<Department> department);
+         Task InsertListDepartmentAsync(List<Department> department);
          Task UpdateDepartmentsAsync(Department department);
-         Task UpdateDepartmentAsync(List<Department> department);
+         Task UpdateListDepartmentAsync(List<Department> department);
     }
 }
