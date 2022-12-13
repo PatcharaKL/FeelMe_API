@@ -127,12 +127,21 @@ namespace Project_FeelMe.Controllers
             return Ok(data);
         }
          [HttpPost("[action]")]
-        public async Task<IActionResult> GetEnamyDetail()
+         [Authorize]
+        public async Task<IActionResult> GetEnemyDetail()
         {
-            var token  = HttpContext.GetTokenAsync("access_token").Result;
-            var user = await _tokenService.DeCodeToken(token);
-            var data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
-            return Ok(data);
+            try
+            {
+                var token  = HttpContext.GetTokenAsync("access_token").Result;
+                var user = await _tokenService.DeCodeToken(token);
+                var data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
+                return Ok(data);
+            }
+            catch(Exception)
+            {
+                return Unauthorized();
+            }
+            
         }
         [Authorize]
         [HttpPost("[action]")]
