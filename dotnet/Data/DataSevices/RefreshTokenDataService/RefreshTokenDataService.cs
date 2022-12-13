@@ -32,7 +32,7 @@ namespace dotnet.Data.DataSevices.RefreshTokenDataService
                  _dbContract.Update(refreshToken);
                 await _dbContract.SaveChangesAsync();
              }
-             public virtual async Task UpdateRefreshTokenAsync(List<RefreshToken> refreshToken)
+             public virtual async Task UpdateListRefreshTokenAsync(List<RefreshToken> refreshToken)
              {
                  _dbContract.UpdateRange(refreshToken);
                 await _dbContract.SaveChangesAsync();

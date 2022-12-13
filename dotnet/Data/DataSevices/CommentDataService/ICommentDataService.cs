@@ -7,8 +7,8 @@ namespace dotnet.Data.DataSevices.CommentDataService
          Task<List<Comment>> GetAllCommentAsync();
          Task<Comment> GetCommentByIdAsync(int id);
          Task InsertCommentAsync(Comment comment);
-         Task InsertCommentAsync(List<Comment> comment);
+         Task InsertListCommentAsync(List<Comment> comment);
          Task UpdateCommentsAsync(Comment comment);
-         Task UpdateCommentAsync(List<Comment> comment);
+         Task UpdateListCommentAsync(List<Comment> comment);
     }
 }

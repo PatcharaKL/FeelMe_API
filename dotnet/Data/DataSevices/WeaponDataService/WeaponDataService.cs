@@ -25,7 +25,7 @@ namespace dotnet.Data.DataSevices.WeaponDataService
                  _dbContract.Update(weapon);
                 await _dbContract.SaveChangesAsync();
              }
-             public virtual async Task UpdateWeaponAsync(List<Weapon> weapon)
+             public virtual async Task UpdateListWeaponAsync(List<Weapon> weapon)
              {
                  _dbContract.UpdateRange(weapon);
                 await _dbContract.SaveChangesAsync();

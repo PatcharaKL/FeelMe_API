@@ -27,13 +27,13 @@ namespace dotnet.Data.DataSevices.CommentDataService
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task InsertCommentAsync(List<Comment> comment)
+        public virtual async Task InsertListCommentAsync(List<Comment> comment)
         {
            _dbContract.AddRange(comment);
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateCommentAsync(List<Comment> comment)
+        public virtual async Task UpdateListCommentAsync(List<Comment> comment)
         {
             _dbContract.UpdateRange(comment);
             await _dbContract.SaveChangesAsync();

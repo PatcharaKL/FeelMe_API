@@ -28,13 +28,13 @@ namespace dotnet.Data.DataSevices.CompanyDataService
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task InsertCompanyAsync(List<Company> Company)
+        public virtual async Task InsertListCompanyAsync(List<Company> Company)
         {
            _dbContract.AddRange(Company);
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateCompanyAsync(List<Company> Company)
+        public virtual async Task UpdateListCompanyAsync(List<Company> Company)
         {
             _dbContract.UpdateRange(Company);
             await _dbContract.SaveChangesAsync();

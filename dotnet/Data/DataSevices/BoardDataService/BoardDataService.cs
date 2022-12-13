@@ -28,13 +28,13 @@ namespace dotnet.Data.DataSevices.BoardDataService
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task InsertBoardAsync(List<Board> board)
+        public virtual async Task InsertListBoardAsync(List<Board> board)
         {
            _dbContract.AddRange(board);
             await _dbContract.SaveChangesAsync();
         }
 
-        public virtual async Task UpdateBoardAsync(List<Board> board)
+        public virtual async Task UpdateListBoardAsync(List<Board> board)
         {
             _dbContract.UpdateRange(board);
             await _dbContract.SaveChangesAsync();
