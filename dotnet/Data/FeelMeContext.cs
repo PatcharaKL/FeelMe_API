@@ -25,6 +25,15 @@ namespace Project_FeelMe.Data
         public virtual DbSet<Log> Logs { get; set; }
         public virtual DbSet<Position> Positions { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<Weapon> Weapons { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseMySql("name=DefaultConnectionString", Microsoft.EntityFrameworkCore.ServerVersion.Parse("10.6.9-mariadb"));
+            }
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -358,6 +367,27 @@ namespace Project_FeelMe.Data
                     .IsRequired()
                     .HasColumnName("isValid")
                     .HasDefaultValueSql("'1'");
+            });
+
+            modelBuilder.Entity<Weapon>(entity =>
+            {
+                entity.HasKey(e => e.WeaponsId)
+                    .HasName("PRIMARY");
+
+                entity.ToTable("weapons");
+
+                entity.Property(e => e.WeaponsId)
+                    .HasColumnType("int(11)")
+                    .HasColumnName("weapons_id");
+
+                entity.Property(e => e.UrlWeapon)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.WeaponName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("weaponName");
             });
 
             OnModelCreatingPartial(modelBuilder);
