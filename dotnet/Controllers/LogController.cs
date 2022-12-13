@@ -49,14 +49,14 @@ namespace dotnet.Controllers
                      await _logDataService.SaveLogAsync(dataLog);
                      userUpdate.Hp -= dataLog.Amount;
                      await _accountDataService.UpdateAccountAsync(userUpdate);
-                     return Ok("Success");
+                     return Ok();
                  }
                  else
                  {
                      await _logDataService.SaveLogAsync(dataLog);
                      userUpdate.Hp = 0;
                      await _accountDataService.UpdateAccountAsync(userUpdate);
-                     return  Ok("Health Point is Negative");
+                     return  Ok();
                  }
                  
              }
@@ -81,7 +81,7 @@ namespace dotnet.Controllers
                     Amount = logSender.amount
                  };
                  await _logDataService.SaveLogAsync(dataLog);
-                return Ok("Success");
+                return Ok();
              }
              catch(Exception)
              {
@@ -97,7 +97,7 @@ namespace dotnet.Controllers
                 var token  = HttpContext.GetTokenAsync("access_token").Result;
                 var data = await _tokenService.DeCodeToken(token);
                  
-                return Ok("Success");
+                return Ok();
              }
              catch(Exception)
              {

@@ -72,7 +72,7 @@ namespace Project_FeelMe.Controllers
             }
             catch (Exception)
             {
-                return Unauthorized("User not found");
+                return Unauthorized();
             }
         }
         [Authorize]
@@ -86,7 +86,7 @@ namespace Project_FeelMe.Controllers
                 var reToken = await _refreshTokenDataService.GetRefreshTokenByRefreshTokenAsync(resultToken.refreshToken);
                 reToken.IsValid = false;
                 await  _refreshTokenDataService.UpdateRefreshTokenAsync(reToken);
-                return Ok("Success");
+                return Ok();
             }
             catch (Exception)
             {
@@ -113,7 +113,7 @@ namespace Project_FeelMe.Controllers
                         await _dbContract.SaveChangesAsync();
                         return Ok(newResultToken);
                 }
-                else return Unauthorized("ReToken is Exp");
+                else return Unauthorized();
             }catch(Exception)
             {
                 return UnprocessableEntity();
@@ -129,7 +129,9 @@ namespace Project_FeelMe.Controllers
          [HttpPost("[action]")]
         public async Task<IActionResult> GetEnamyDetail()
         {
-            var data =  await _accountDataService.GetDetailEnemyAsync(2); 
+            var token  = HttpContext.GetTokenAsync("access_token").Result;
+            var user = await _tokenService.DeCodeToken(token);
+            var data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
             return Ok(data);
         }
         [Authorize]
