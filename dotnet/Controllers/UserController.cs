@@ -126,22 +126,22 @@ namespace Project_FeelMe.Controllers
             var data =  await _refreshTokenDataService.GetRefreshTokenListByAccountIdAsync(accountId); 
             return Ok(data);
         }
-         [HttpPost("[action]")]
-         [Authorize]
-        public async Task<IActionResult> GetEnemyDetail()
+
+        [HttpPost("[action]")]
+        [Authorize]
+        public async Task<IActionResult> GetEnemyDetail([FromBody] AccountViewModels.UserName userName)
         {
-            try
-            {
                 var token  = HttpContext.GetTokenAsync("access_token").Result;
                 var user = await _tokenService.DeCodeToken(token);
-                var data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
+                var data = new List<UserDetail>();
+                if(user == null) return Unauthorized();
+                else if (userName.userName == null)
+                {
+                    data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
+                    return Ok(data);
+                }
+                 data =  await _accountDataService.GetSearchAccountByNameAsync(userName.userName); 
                 return Ok(data);
-            }
-            catch(Exception)
-            {
-                return Unauthorized();
-            }
-            
         }
         [Authorize]
         [HttpPost("[action]")]
@@ -156,8 +156,8 @@ namespace Project_FeelMe.Controllers
       
         private async Task<Account> Authenticate(UserLogin userLogin)
         {
-              var userAccount = await _accountDataService.GetAccountByEmailAsync(userLogin.Email);
-              var ckPasswordHash = await _passwordService.CheckPassword(userLogin.Password,userAccount.PasswordHash);
+            var userAccount = await _accountDataService.GetAccountByEmailAsync(userLogin.Email);
+            var ckPasswordHash = await _passwordService.CheckPassword(userLogin.Password,userAccount.PasswordHash);
             if (ckPasswordHash == true) return userAccount;
             else return null;
         }
