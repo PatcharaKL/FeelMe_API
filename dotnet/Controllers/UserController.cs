@@ -133,15 +133,17 @@ namespace Project_FeelMe.Controllers
         {
                 var token  = HttpContext.GetTokenAsync("access_token").Result;
                 var user = await _tokenService.DeCodeToken(token);
-                var data = new List<UserDetail>();
                 if(user == null) return Unauthorized();
                 else if (userName.userName == null)
                 {
-                    data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
+                   var data =  await _accountDataService.GetDetailEnemyAsync(user.AccountId); 
                     return Ok(data);
                 }
-                 data =  await _accountDataService.GetSearchAccountByNameAsync(userName.userName); 
-                return Ok(data);
+                else
+                {
+                    var data =  await _accountDataService.GetSearchAccountByNameAsync(userName.userName); 
+                    return Ok(data);
+                }
         }
         [Authorize]
         [HttpPost("[action]")]
