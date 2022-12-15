@@ -72,6 +72,30 @@ namespace dotnet.Data.DataSevices.AccountDataService
                      var data = await _dbContract.Accounts.FirstOrDefaultAsync(account => account.Email == email);
                     return data;
                }
+                public virtual async Task<List<UserDetail>> GetSearchAccountByNameAsync(string name)
+               {
+                        var data = await (
+                                                 from account in _dbContract.Accounts
+                                                 from position in _dbContract.Positions
+                                                 from depatrtment in _dbContract.Departments
+                                                 from company in _dbContract.Companies
+                                                 where (account.Name.Contains(name)) 
+                                                     &&(position.PositionId == account.PositionId)
+                                                     &&(depatrtment.DepartmentId == account.DepartmentId)
+                                                     &&(company.CompanyId == account.CompanyId)
+                                                select new UserDetail
+                                             {
+                                                 Email = account.Email,
+                                                 Name = account.Name,
+                                                 Surname = account.Surname,
+                                                 Hp = account.Hp,
+                                                 Level = account.Level,
+                                                 PositionName = position.PositionName,
+                                                 DepartmentName = depatrtment.DepartmentName,
+                                                 CompanyName = company.Name
+                                             }).ToListAsync();
+                    return data;
+               }
                public virtual async Task UpdateAccountAsync(Account data)
                {
                       _dbContract.Update(data);

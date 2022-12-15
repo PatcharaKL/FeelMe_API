@@ -11,5 +11,6 @@ namespace dotnet.Data.DataSevices.AccountDataService
          Task UpdateAccountAsync(Account data);
          Task InsertAccountAsync(Account data);
          Task<List<UserDetail>> GetDetailEnemyAsync(int accountId);
+         Task<List<UserDetail>> GetSearchAccountByNameAsync(string name);
     }
 }
