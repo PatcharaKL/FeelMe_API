@@ -9,7 +9,7 @@ services:
       - 80:80
     restart: unless-stopped
     depends_on:
-      - api
+      - golang-api
     networks:
       - nginx-network
 
@@ -20,8 +20,6 @@ services:
     volumes:
       - $PWD:/go/src/target
     container_name: feelme-api
-    depends_on:
-      - nginx
     expose:
       - 5000
     restart: "unless-stopped"
