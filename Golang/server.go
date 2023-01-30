@@ -22,7 +22,7 @@ func middlewareHandler(e *echo.Echo) {
 }
 func endpointHandler(e *echo.Echo, h *users.Handler) {
 	r := e.Group("/users")
-	e.POST("/userlogin", h.UserLoginHandler)
+	e.POST("/login", h.UserLoginHandler)
 
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
