@@ -23,6 +23,7 @@ func middlewareHandler(e *echo.Echo) {
 func endpointHandler(e *echo.Echo, h *users.Handler) {
 	r := e.Group("/users")
 	e.POST("/login", h.UserLoginHandler)
+	e.POST("/logout", h.UserLogOutHandler)
 
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
@@ -31,7 +32,7 @@ func endpointHandler(e *echo.Echo, h *users.Handler) {
 		SigningKey: []byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"),
 	}
 	r.Use(echojwt.WithConfig(config))
-	r.POST("/userlogout", h.UserLogOutHandler)
+
 }
 func main() {
 	db := users.InitDB()
