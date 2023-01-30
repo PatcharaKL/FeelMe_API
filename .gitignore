@@ -235,3 +235,6 @@ _Pvt_Extensions
 
 # Visual Studio Code
 .vscode
+
+./Golang/rest/users/.out
+./Golang/rest/users/.html

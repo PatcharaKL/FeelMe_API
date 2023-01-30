@@ -11,17 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type jwtCustomClaims struct {
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Surname      string `json:"surname"`
-	Role         int    `json:"role"`
-	AccountId    int    `json:"accountId"`
-	DepartmentId int    `json:"departmentId"`
-	CompanyId    int    `json:"companyId"`
-	jwt.RegisteredClaims
-}
-
 func CheckPasswordHash(password, hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	if err != nil {
@@ -38,11 +27,11 @@ func GeneraterRefreshToken() string {
 	return strings.Join(refreshToken, "-")
 }
 func GeneraterTokenAccess(ac Account) (string, error) {
-	claims := &jwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
-		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 120))},
+	claims := &JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
+		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"))
 	if err != nil {
 		return "", err
 	}
