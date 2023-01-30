@@ -44,7 +44,7 @@ func main() {
 	endpointHandler(e, users.NewApplication(db))
 
 	go func() {
-		if err := e.Start(":5000"); err != nil && err != http.ErrServerClosed {
+		if err := e.Start(":80"); err != nil && err != http.ErrServerClosed {
 			e.Logger.Fatal("shutting down server")
 		}
 	}()
