@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 80:80
+    restart: unless-stopped
+    depends_on:
+      - golang-api
+    networks:
+      - nginx-network
+
+  golang-api:
+    build:
+      context: ./Golang
+      dockerfile: ./Dockerfile
+    volumes:
+      - $PWD:/go/src/target
+    container_name: feelme-api
+    expose:
+      - 5000
+    restart: "unless-stopped"
+    networks:
+      - nginx-network
+networks:
+  nginx-network:
+    driver: bridge
+  
+    
