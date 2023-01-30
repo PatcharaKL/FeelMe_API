@@ -5,6 +5,7 @@ import (
 	"log"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 const (
@@ -14,12 +15,25 @@ const (
 	updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
 )
 
+type JwtCustomClaims struct {
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	Surname      string `json:"surname"`
+	Role         int    `json:"role"`
+	AccountId    int    `json:"accountId"`
+	DepartmentId int    `json:"departmentId"`
+	CompanyId    int    `json:"companyId"`
+	jwt.RegisteredClaims
+}
 type Handler struct {
 	DB *sql.DB
 }
 type userLogin struct {
 	Email    string `json:"email" form:"email" query:"email"`
 	Password string `json:"password" form:"password" query:"password"`
+}
+type Refreshtoken struct {
+	Refreshtoken string `json:"refreshToken" form:"refreshToken" query:"refreshToken"`
 }
 type userLoginDTO struct {
 	Email    string `json:"email" form:"email" query:"email"`

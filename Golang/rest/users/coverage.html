@@ -55,9 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (38.9%)</option>
+				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (57.4%)</option>
 				
-				<option value="file1">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (0.0%)</option>
+				<option value="file1">github.com/PatcharaKL/FeelMe_API/rest/users/userlogout.go (100.0%)</option>
+				
+				<option value="file2">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (20.0%)</option>
 				
 				</select>
 			</div>
@@ -84,17 +86,6 @@ import (
         "golang.org/x/crypto/bcrypt"
 )
 
-type jwtCustomClaims struct {
-        Email        string `json:"email"`
-        Name         string `json:"name"`
-        Surname      string `json:"surname"`
-        Role         int    `json:"role"`
-        AccountId    int    `json:"accountId"`
-        DepartmentId int    `json:"departmentId"`
-        CompanyId    int    `json:"companyId"`
-        jwt.RegisteredClaims
-}
-
 func CheckPasswordHash(password, hash string) error <span class="cov8" title="1">{
         err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
         if err != nil </span><span class="cov8" title="1">{
@@ -111,11 +102,11 @@ func GeneraterRefreshToken() string <span class="cov0" title="0">{
         <span class="cov0" title="0">return strings.Join(refreshToken, "-")</span>
 }
 func GeneraterTokenAccess(ac Account) (string, error) <span class="cov0" title="0">{
-        claims := &amp;jwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
-                ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * 120))},
+        claims := &amp;JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
+                ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
         }
         token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-        t, err := token.SignedString([]byte("secret"))
+        t, err := token.SignedString([]byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"))
         if err != nil </span><span class="cov0" title="0">{
                 return "", err
         }</span>
@@ -162,25 +153,25 @@ func (h *Handler) UserLoginHandler(c echo.Context) error <span class="cov8" titl
 }
 func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8" title="1">{
         rows, err := h.DB.Query(getRefreshTokenByAccountId, accountId, true)
-        if err != nil </span><span class="cov8" title="1">{
+        if err != nil </span><span class="cov0" title="0">{
                 return err
         }</span>
-        <span class="cov0" title="0">reks := []string{}
-        for rows.Next() </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">reks := []string{}
+        for rows.Next() </span><span class="cov8" title="1">{
                 tk := ""
                 err := rows.Scan(&amp;tk)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
-                <span class="cov0" title="0">reks = append(reks, tk)</span>
+                <span class="cov8" title="1">reks = append(reks, tk)</span>
         }
-        <span class="cov0" title="0">for i := 0; i &lt; len(reks); i++ </span><span class="cov0" title="0">{
+        <span class="cov8" title="1">for i := 0; i &lt; len(reks); i++ </span><span class="cov8" title="1">{
                 stmt, err := h.DB.Prepare(updateStatusRefreshToken)
                 if err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
 
-                <span class="cov0" title="0">if _, err := stmt.Exec(false, reks[i]); err != nil </span><span class="cov0" title="0">{
+                <span class="cov8" title="1">if _, err := stmt.Exec(false, reks[i]); err != nil </span><span class="cov8" title="1">{
                         return err
                 }</span>
         }
@@ -191,10 +182,35 @@ func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8
 		<pre class="file" id="file1" style="display: none">package users
 
 import (
+        "net/http"
+
+        "github.com/labstack/echo/v4"
+)
+
+func (h *Handler) UserLogOutHandler(c echo.Context) error <span class="cov8" title="1">{
+        token := new(Refreshtoken)
+        if err := c.Bind(&amp;token); err != nil </span><span class="cov8" title="1">{
+                return c.String(http.StatusBadRequest, "")
+        }</span>
+        <span class="cov8" title="1">stml, err := h.DB.Prepare(updateStatusRefreshToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return c.String(http.StatusInternalServerError, err.Error())
+        }</span>
+        <span class="cov8" title="1">if _, err := stml.Exec(false, token.Refreshtoken); err != nil </span><span class="cov8" title="1">{
+                return c.String(http.StatusInternalServerError, err.Error())
+        }</span>
+        <span class="cov8" title="1">return c.String(http.StatusOK, "")</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package users
+
+import (
         "database/sql"
         "log"
 
         _ "github.com/go-sql-driver/mysql"
+        "github.com/golang-jwt/jwt/v4"
 )
 
 const (
@@ -204,12 +220,25 @@ const (
         updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
 )
 
+type JwtCustomClaims struct {
+        Email        string `json:"email"`
+        Name         string `json:"name"`
+        Surname      string `json:"surname"`
+        Role         int    `json:"role"`
+        AccountId    int    `json:"accountId"`
+        DepartmentId int    `json:"departmentId"`
+        CompanyId    int    `json:"companyId"`
+        jwt.RegisteredClaims
+}
 type Handler struct {
         DB *sql.DB
 }
 type userLogin struct {
         Email    string `json:"email" form:"email" query:"email"`
         Password string `json:"password" form:"password" query:"password"`
+}
+type Refreshtoken struct {
+        Refreshtoken string `json:"refreshToken" form:"refreshToken" query:"refreshToken"`
 }
 type userLoginDTO struct {
         Email    string `json:"email" form:"email" query:"email"`
@@ -233,7 +262,7 @@ type Account struct {
         CompanyId    int            `json:"company_id" query:"company_id"`
 }
 
-func NewApplication(db *sql.DB) *Handler <span class="cov0" title="0">{
+func NewApplication(db *sql.DB) *Handler <span class="cov8" title="1">{
         return &amp;Handler{db}
 }</span>
 
