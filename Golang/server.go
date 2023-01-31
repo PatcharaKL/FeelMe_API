@@ -29,6 +29,7 @@ func endpointHandler(e *echo.Echo, h *users.Handler) {
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(users.JwtCustomClaims)
 		},
+		//! Change setring key to get from env
 		SigningKey: []byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"),
 	}
 	r.Use(echojwt.WithConfig(config))
