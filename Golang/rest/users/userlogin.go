@@ -2,11 +2,11 @@ package users
 
 import (
 	"net/http"
-	"strings"
 	"time"
 
+	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,27 +18,20 @@ func CheckPasswordHash(password, hash string) error {
 	}
 	return nil
 }
-func GeneraterRefreshToken() string {
-	refreshToken := []string{}
-	for i := 0; i < 4; i++ {
-		id := uuid.New()
-		refreshToken = append(refreshToken, id.String())
-	}
-	return strings.Join(refreshToken, "-")
-}
-func GeneraterTokenAccess(ac Account) (string, error) {
+
+func GeneraterTokenAccess(ac models.Account) (string, error) {
 	claims := &JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
 		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString([]byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"))
+	t, err := token.SignedString([]byte(tokens.Signingkey))
 	if err != nil {
 		return "", err
 	}
 	return t, nil
 }
 func (h *Handler) UserLoginHandler(c echo.Context) error {
-	ac := new(Account)
+	ac := new(models.Account)
 	u := new(userLogin)
 	err := c.Bind(u)
 	if err != nil {
@@ -48,7 +41,7 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 		Email:    u.Email,
 		Password: u.Password,
 	}
-	row := h.DB.QueryRow(getAccountById, user.Email)
+	row := h.DB.QueryRow(getAccountByEmail, user.Email)
 	if err := row.Scan(&ac.AccountId, &ac.Email, &ac.PasswordHash, &ac.Name,
 		&ac.Surname, &ac.AvatarUrl, &ac.ApplyDate, &ac.IsActive, &ac.Hp,
 		&ac.Level, &ac.Created, &ac.DepartmentId, &ac.PositionId, &ac.CompanyId); err != nil {
@@ -61,12 +54,12 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 	if err = UpdateStatusRefreshToken(h, ac.AccountId); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
-	token, _ := GeneraterTokenAccess(*ac)
+	token, _ := tokens.GeneraterTokenAccess(*ac)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "")
 	}
 
-	refreshToken := GeneraterRefreshToken()
+	refreshToken := tokens.GeneraterRefreshToken()
 	ckRefreshToken := ""
 	if err := h.DB.QueryRow(createRefreshToken, refreshToken, ac.AccountId, time.Now().Add(time.Hour*360), true).Scan(&ckRefreshToken); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
