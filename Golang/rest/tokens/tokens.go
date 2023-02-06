@@ -13,7 +13,7 @@ import (
 const (
 	Signingkey               = "GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"
 	getAccountById           = "SELECT * FROM accounts WHERE account_id=?"
-	getRefresh               = "SELECT * FROM refresh_token WHERE refreshToken=? &&  isValid=? && exp >= ?"
+	getRefresh               = "SELECT * FROM refresh_token WHERE refreshToken = ? && isValid = ? && exp >= ?"
 	createRefreshToken       = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
 	updateStatusRefreshToken = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
 )

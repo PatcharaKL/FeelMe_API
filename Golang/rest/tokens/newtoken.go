@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -16,9 +17,15 @@ func (h *Handler) NewTokenHandler(c echo.Context) error {
 	}
 	tk := new(Token)
 	row := h.DB.QueryRow(getRefresh, reToken.Refreshtoken, true, time.Now())
+
+	//! ----------
 	if err := row.Scan(&tk.Refreshtokens, &tk.AccountId, &tk.Exp, &tk.IsValid); err != nil {
+		log.Print("------------")
+		log.Print(err)
+		log.Print("------------")
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
+
 	row = h.DB.QueryRow(getAccountById, tk.AccountId)
 	if err := row.Scan(&ac.AccountId, &ac.Email, &ac.PasswordHash, &ac.Name,
 		&ac.Surname, &ac.AvatarUrl, &ac.ApplyDate, &ac.IsActive, &ac.Hp,
