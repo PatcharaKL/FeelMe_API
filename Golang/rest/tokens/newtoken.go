@@ -32,8 +32,9 @@ func (h *Handler) NewTokenHandler(c echo.Context) error {
 		&ac.Level, &ac.Created, &ac.DepartmentId, &ac.PositionId, &ac.CompanyId); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
+
 	refreshToken := GeneraterRefreshToken()
-	token, _ := GeneraterTokenAccess(*ac)
+	token := GeneraterTokenAccess(*ac)
 	stmt, err := h.DB.Prepare(updateStatusRefreshToken)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})

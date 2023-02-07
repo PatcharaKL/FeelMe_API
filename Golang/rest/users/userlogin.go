@@ -54,7 +54,7 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 	if err = UpdateStatusRefreshToken(h, ac.AccountId); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
-	token, _ := tokens.GeneraterTokenAccess(*ac)
+	token := tokens.GeneraterTokenAccess(*ac)
 	if err != nil {
 		return c.String(http.StatusBadRequest, "")
 	}

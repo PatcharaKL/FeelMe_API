@@ -14,7 +14,7 @@ const (
 	Signingkey               = "GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"
 	getAccountById           = "SELECT * FROM accounts WHERE account_id=?"
 	getRefresh               = "SELECT * FROM refresh_token WHERE refreshToken = ? && isValid = ? && exp >= ?"
-	createRefreshToken       = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
+	createRefreshToken       = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?);`
 	updateStatusRefreshToken = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
 )
 
@@ -57,14 +57,12 @@ func GeneraterRefreshToken() string {
 	}
 	return strings.Join(refreshToken, "-")
 }
-func GeneraterTokenAccess(ac models.Account) (string, error) {
+func GeneraterTokenAccess(ac models.Account) string {
 	claims := &JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
-		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
+		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 2))},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString([]byte(Signingkey))
-	if err != nil {
-		return "", err
-	}
-	return t, nil
+	t, _ := token.SignedString([]byte(Signingkey))
+
+	return t
 }
