@@ -55,11 +55,11 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (57.4%)</option>
+				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (95.0%)</option>
 				
 				<option value="file1">github.com/PatcharaKL/FeelMe_API/rest/users/userlogout.go (100.0%)</option>
 				
-				<option value="file2">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (20.0%)</option>
+				<option value="file2">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -77,11 +77,10 @@
 
 import (
         "net/http"
-        "strings"
         "time"
 
-        "github.com/golang-jwt/jwt/v4"
-        "github.com/google/uuid"
+        models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+        "github.com/PatcharaKL/FeelMe_API/rest/tokens"
         "github.com/labstack/echo/v4"
         "golang.org/x/crypto/bcrypt"
 )
@@ -93,27 +92,9 @@ func CheckPasswordHash(password, hash string) error <span class="cov8" title="1"
         }</span>
         <span class="cov8" title="1">return nil</span>
 }
-func GeneraterRefreshToken() string <span class="cov0" title="0">{
-        refreshToken := []string{}
-        for i := 0; i &lt; 4; i++ </span><span class="cov0" title="0">{
-                id := uuid.New()
-                refreshToken = append(refreshToken, id.String())
-        }</span>
-        <span class="cov0" title="0">return strings.Join(refreshToken, "-")</span>
-}
-func GeneraterTokenAccess(ac Account) (string, error) <span class="cov0" title="0">{
-        claims := &amp;JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
-                ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
-        }
-        token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-        t, err := token.SignedString([]byte("GVebOWpKrqyZ9RwPXzazpNpcmA6njskh"))
-        if err != nil </span><span class="cov0" title="0">{
-                return "", err
-        }</span>
-        <span class="cov0" title="0">return t, nil</span>
-}
+
 func (h *Handler) UserLoginHandler(c echo.Context) error <span class="cov8" title="1">{
-        ac := new(Account)
+        ac := new(models.Account)
         u := new(userLogin)
         err := c.Bind(u)
         if err != nil </span><span class="cov8" title="1">{
@@ -123,7 +104,7 @@ func (h *Handler) UserLoginHandler(c echo.Context) error <span class="cov8" titl
                 Email:    u.Email,
                 Password: u.Password,
         }
-        row := h.DB.QueryRow(getAccountById, user.Email)
+        row := h.DB.QueryRow(getAccountByEmail, user.Email)
         if err := row.Scan(&amp;ac.AccountId, &amp;ac.Email, &amp;ac.PasswordHash, &amp;ac.Name,
                 &amp;ac.Surname, &amp;ac.AvatarUrl, &amp;ac.ApplyDate, &amp;ac.IsActive, &amp;ac.Hp,
                 &amp;ac.Level, &amp;ac.Created, &amp;ac.DepartmentId, &amp;ac.PositionId, &amp;ac.CompanyId); err != nil </span><span class="cov8" title="1">{
@@ -136,31 +117,26 @@ func (h *Handler) UserLoginHandler(c echo.Context) error <span class="cov8" titl
         <span class="cov8" title="1">if err = UpdateStatusRefreshToken(h, ac.AccountId); err != nil </span><span class="cov8" title="1">{
                 return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
         }</span>
-        <span class="cov0" title="0">token, _ := GeneraterTokenAccess(*ac)
-        if err != nil </span><span class="cov0" title="0">{
-                return c.String(http.StatusBadRequest, "")
-        }</span>
-
-        <span class="cov0" title="0">refreshToken := GeneraterRefreshToken()
+        <span class="cov8" title="1">token := tokens.GeneraterTokenAccess(*ac)
+        refreshToken := tokens.GeneraterRefreshToken()
         ckRefreshToken := ""
-        if err := h.DB.QueryRow(createRefreshToken, refreshToken, ac.AccountId, time.Now().Add(time.Hour*360), true).Scan(&amp;ckRefreshToken); err != nil </span><span class="cov0" title="0">{
+        if err := h.DB.QueryRow(createRefreshToken, refreshToken, ac.AccountId, time.Now().Add(time.Hour*360), true).Scan(&amp;ckRefreshToken); err != nil </span><span class="cov8" title="1">{
                 return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
         }</span>
-        <span class="cov0" title="0">return c.JSON(http.StatusOK, echo.Map{
+        <span class="cov8" title="1">return c.JSON(http.StatusOK, echo.Map{
                 "accessToken":  token,
                 "refreshToken": refreshToken,
         })</span>
 }
 func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8" title="1">{
         rows, err := h.DB.Query(getRefreshTokenByAccountId, accountId, true)
-        if err != nil </span><span class="cov0" title="0">{
+        if err != nil </span><span class="cov8" title="1">{
                 return err
         }</span>
         <span class="cov8" title="1">reks := []string{}
         for rows.Next() </span><span class="cov8" title="1">{
                 tk := ""
-                err := rows.Scan(&amp;tk)
-                if err != nil </span><span class="cov0" title="0">{
+                if err := rows.Scan(&amp;tk); err != nil </span><span class="cov0" title="0">{
                         return err
                 }</span>
                 <span class="cov8" title="1">reks = append(reks, tk)</span>
@@ -175,7 +151,7 @@ func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8
                         return err
                 }</span>
         }
-        <span class="cov0" title="0">return nil</span>
+        <span class="cov8" title="1">return nil</span>
 }
 </pre>
 		
@@ -184,11 +160,12 @@ func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8
 import (
         "net/http"
 
+        "github.com/PatcharaKL/FeelMe_API/rest/tokens"
         "github.com/labstack/echo/v4"
 )
 
 func (h *Handler) UserLogOutHandler(c echo.Context) error <span class="cov8" title="1">{
-        token := new(Refreshtoken)
+        token := new(tokens.Refreshtoken)
         if err := c.Bind(&amp;token); err != nil </span><span class="cov8" title="1">{
                 return c.String(http.StatusBadRequest, "")
         }</span>
@@ -207,14 +184,14 @@ func (h *Handler) UserLogOutHandler(c echo.Context) error <span class="cov8" tit
 
 import (
         "database/sql"
-        "log"
 
         _ "github.com/go-sql-driver/mysql"
         "github.com/golang-jwt/jwt/v4"
 )
 
 const (
-        getAccountById             = "SELECT * FROM accounts WHERE email=?"
+        getAccountByEmail          = "SELECT * FROM accounts WHERE email=?"
+        getAccountById             = "SELECT * FROM accounts WHERE account_id=?"
         getRefreshTokenByAccountId = "SELECT refreshToken FROM refresh_token WHERE account_id=? &amp;&amp; isValid=?"
         createRefreshToken         = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
         updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
@@ -237,29 +214,10 @@ type userLogin struct {
         Email    string `json:"email" form:"email" query:"email"`
         Password string `json:"password" form:"password" query:"password"`
 }
-type Refreshtoken struct {
-        Refreshtoken string `json:"refreshToken" form:"refreshToken" query:"refreshToken"`
-}
+
 type userLoginDTO struct {
         Email    string `json:"email" form:"email" query:"email"`
         Password string `json:"password" form:"password" query:"password"`
-}
-
-type Account struct {
-        AccountId    int            `json:"account_id" query:"account_id"`
-        Email        string         `json:"email" query:"email"`
-        PasswordHash string         `json:"password_hash" query:"password_hash"`
-        Name         string         `json:"name" query:"name"`
-        Surname      string         `json:"surname" query:"surname"`
-        AvatarUrl    sql.NullString `json:"avatar_url" query:"avatar_url"`
-        ApplyDate    []uint8        `json:"apply_date" query:"apply_date"`
-        IsActive     bool           `json:"is_active" query:"is_active"`
-        Hp           int            `json:"hp" query:"hp"`
-        Level        int            `json:"level" query:"level"`
-        Created      []uint8        `json:"created" query:"created"`
-        DepartmentId int            `json:"department_id" query:"department_id"`
-        PositionId   int            `json:"posirion_id" query:"posirion_id"`
-        CompanyId    int            `json:"company_id" query:"company_id"`
 }
 
 func NewApplication(db *sql.DB) *Handler <span class="cov8" title="1">{
@@ -268,14 +226,6 @@ func NewApplication(db *sql.DB) *Handler <span class="cov8" title="1">{
 
 type Err struct {
         Message string `json:"message"`
-}
-
-func InitDB() *sql.DB <span class="cov0" title="0">{
-        db, err := sql.Open("mysql", "feelme_admin:zj439$Z2p@tcp(119.59.96.90)/feelme_db")
-        if err != nil </span><span class="cov0" title="0">{
-                log.Fatal("Connect to database error", err)
-        }</span>
-        <span class="cov0" title="0">return db</span>
 }
 </pre>
 		

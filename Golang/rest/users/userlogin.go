@@ -6,7 +6,6 @@ import (
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,17 +18,6 @@ func CheckPasswordHash(password, hash string) error {
 	return nil
 }
 
-func GeneraterTokenAccess(ac models.Account) (string, error) {
-	claims := &JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
-		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 2))},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, err := token.SignedString([]byte(tokens.Signingkey))
-	if err != nil {
-		return "", err
-	}
-	return t, nil
-}
 func (h *Handler) UserLoginHandler(c echo.Context) error {
 	ac := new(models.Account)
 	u := new(userLogin)
@@ -55,10 +43,6 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 	token := tokens.GeneraterTokenAccess(*ac)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "")
-	}
-
 	refreshToken := tokens.GeneraterRefreshToken()
 	ckRefreshToken := ""
 	if err := h.DB.QueryRow(createRefreshToken, refreshToken, ac.AccountId, time.Now().Add(time.Hour*360), true).Scan(&ckRefreshToken); err != nil {
@@ -77,8 +61,7 @@ func UpdateStatusRefreshToken(h *Handler, accountId int) error {
 	reks := []string{}
 	for rows.Next() {
 		tk := ""
-		err := rows.Scan(&tk)
-		if err != nil {
+		if err := rows.Scan(&tk); err != nil {
 			return err
 		}
 		reks = append(reks, tk)
