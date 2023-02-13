@@ -209,15 +209,86 @@ func TestUserLogOut(t *testing.T) {
 		})
 	}
 }
+func TestHappinesspoint(t *testing.T) {
+	tests := []struct {
+		name         string
+		body         *bytes.Buffer
+		expectedCode int
+	}{
+		// {
+		// 	name: "testSucceed",
+		// 	body: bytes.NewBufferString(`{
+		// 		"seif_points": 20,
+		// 		"work_points": 4,
+		// 		"co_worker_points": 8
+		// 	}`),
+		// 	expectedCode: http.StatusCreated,
+		// },
+		{
+			name: "testUnauthorized",
+			body: bytes.NewBufferString(`{
+				"seif_points": 20,
+  				"work_points": 4,
+ 				"co_worker_points": 8
+			}`),
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name: "testBadRequest",
+			body: bytes.NewBufferString(`{
+				"seif_points: 20,
+  				"work_points: 4,
+ 				"co_worker_points: 8
+			}`),
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name: "testInternalServerError",
+			body: bytes.NewBufferString(`{
+				"seif_points": 20,
+				"work_points": 4,
+			  	"co_worker_points": 8
+			}`),
+			expectedCode: http.StatusInternalServerError,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rec, c := setupTestServer(http.MethodPost, "/users/employees/:id/happiness-points", tt.body)
+			db, mock, err := sqlmock.New()
+			if err != nil {
+				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+			}
+			defer db.Close()
+			expectedID := 1
+			expected := sqlmock.NewRows([]string{"id"}).AddRow(expectedID)
+			if tt.name != "testInternalServerError" {
+				mock.ExpectQuery("INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;").
+					WithArgs(1, 20, 4, 8, AnyTime{}).WillReturnRows(expected)
+			}
+			h := Handler{db}
+
+			err = h.HappinesspointHandler(c)
+
+			if assert.NoError(t, err) {
+				assert.Equal(t, tt.expectedCode, rec.Code)
+				t.Log(rec.Body)
+			}
+		})
+	}
+}
 func setupTestServer(method, uri string, body *bytes.Buffer) (*httptest.ResponseRecorder, echo.Context) {
 	e := echo.New()
 	req := httptest.NewRequest(method, uri, body)
+	req.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjYyMDEwNzAzMDAyOEBkcHUuYWMudGgiLCJuYW1lIjoiU2F5ZmFyIiwic3VybmFtZSI6IkhvbmdzYWVuZyIsInJvbGUiOjMsImFjY291bnRJZCI6MiwiZGVwYXJ0bWVudElkIjoxLCJjb21wYW55SWQiOjEsImV4cCI6MTY3NTkzNjEwNn0.vJRq54zzPemK4wS55Ue-WRDgPIJeJthZUe4-S37sYZg")
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
 	return rec, c
 }
+
 func TestNewApplicationInit(t *testing.T) {
 	// Arrange
 	db, _, _ := sqlmock.New()

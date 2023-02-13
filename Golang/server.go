@@ -32,12 +32,13 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	e.POST("/logout", h.UserLogOutHandler)
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(users.JwtCustomClaims)
+			return new(tokens.JwtCustomClaims)
 		},
-		SigningKey: []byte(tokens.Signingkey),
+		SigningKey:  []byte(tokens.Signingkey),
+		TokenLookup: "header:x-auth-token",
 	}
 	r.Use(echojwt.WithConfig(config))
-
+	r.POST("/employees/:id/happiness-points", h.HappinesspointHandler)
 }
 func main() {
 	db := models.InitDB()

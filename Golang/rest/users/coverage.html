@@ -55,11 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (95.0%)</option>
+				<option value="file0">github.com/PatcharaKL/FeelMe_API/rest/users/happiness.go (0.0%)</option>
 				
-				<option value="file1">github.com/PatcharaKL/FeelMe_API/rest/users/userlogout.go (100.0%)</option>
+				<option value="file1">github.com/PatcharaKL/FeelMe_API/rest/users/userlogin.go (95.0%)</option>
 				
-				<option value="file2">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (100.0%)</option>
+				<option value="file2">github.com/PatcharaKL/FeelMe_API/rest/users/userlogout.go (100.0%)</option>
+				
+				<option value="file3">github.com/PatcharaKL/FeelMe_API/rest/users/users.go (100.0%)</option>
 				
 				</select>
 			</div>
@@ -74,6 +76,40 @@
 		<div id="content">
 		
 		<pre class="file" id="file0" style="display: none">package users
+
+import (
+        "net/http"
+        "time"
+
+        "github.com/PatcharaKL/FeelMe_API/rest/tokens"
+        "github.com/golang-jwt/jwt/v4"
+        "github.com/labstack/echo/v4"
+)
+
+func (h *Handler) HappinesspointHandler(c echo.Context) error <span class="cov0" title="0">{
+        user := c.Get("user").(*jwt.Token)
+        claims := user.Claims.(*tokens.JwtCustomClaims)
+        userId := claims.AccountId
+
+        hpyPointBody := new(HapPointRequest)
+        if err := c.Bind(hpyPointBody); err != nil </span><span class="cov0" title="0">{
+                return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+        }</span>
+        <span class="cov0" title="0">hpyPoint := HappinessPoint{}
+        if err := h.DB.QueryRow(createdHappinessPoint, userId, hpyPointBody.Selfpoints, hpyPointBody.Workpoints, hpyPointBody.Copoints, time.Now()).Scan(&amp;hpyPoint.Id); err != nil </span><span class="cov0" title="0">{
+
+                return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+        }</span>
+        <span class="cov0" title="0">return c.JSON(http.StatusCreated, echo.Map{
+                "user_id":          userId,
+                "self_points":      hpyPointBody.Selfpoints,
+                "work_points":      hpyPointBody.Workpoints,
+                "co_worker_points": hpyPointBody.Copoints,
+        })</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package users
 
 import (
         "net/http"
@@ -155,7 +191,7 @@ func UpdateStatusRefreshToken(h *Handler, accountId int) error <span class="cov8
 }
 </pre>
 		
-		<pre class="file" id="file1" style="display: none">package users
+		<pre class="file" id="file2" style="display: none">package users
 
 import (
         "net/http"
@@ -180,13 +216,12 @@ func (h *Handler) UserLogOutHandler(c echo.Context) error <span class="cov8" tit
 }
 </pre>
 		
-		<pre class="file" id="file2" style="display: none">package users
+		<pre class="file" id="file3" style="display: none">package users
 
 import (
         "database/sql"
 
         _ "github.com/go-sql-driver/mysql"
-        "github.com/golang-jwt/jwt/v4"
 )
 
 const (
@@ -195,18 +230,22 @@ const (
         getRefreshTokenByAccountId = "SELECT refreshToken FROM refresh_token WHERE account_id=? &amp;&amp; isValid=?"
         createRefreshToken         = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
         updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
+        createdHappinessPoint      = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
 )
 
-type JwtCustomClaims struct {
-        Email        string `json:"email"`
-        Name         string `json:"name"`
-        Surname      string `json:"surname"`
-        Role         int    `json:"role"`
-        AccountId    int    `json:"accountId"`
-        DepartmentId int    `json:"departmentId"`
-        CompanyId    int    `json:"companyId"`
-        jwt.RegisteredClaims
+type HapPointRequest struct {
+        Selfpoints int `json:"seif_points"`
+        Workpoints int `json:"work_points"`
+        Copoints   int `json:"co_worker_points"`
 }
+type HappinessPoint struct {
+        Id         int     `json:"id"`
+        Selfpoints int     `json:"seif_point"`
+        Workpoints int     `json:"work_point"`
+        Copoints   int     `json:"co_worker_point"`
+        TimeStamp  []uint8 `json:"timestamp"`
+}
+
 type Handler struct {
         DB *sql.DB
 }

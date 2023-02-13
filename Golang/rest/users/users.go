@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/golang-jwt/jwt/v4"
 )
 
 const (
@@ -13,18 +12,22 @@ const (
 	getRefreshTokenByAccountId = "SELECT refreshToken FROM refresh_token WHERE account_id=? && isValid=?"
 	createRefreshToken         = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
 	updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
+	createdHappinessPoint      = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
 )
 
-type JwtCustomClaims struct {
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Surname      string `json:"surname"`
-	Role         int    `json:"role"`
-	AccountId    int    `json:"accountId"`
-	DepartmentId int    `json:"departmentId"`
-	CompanyId    int    `json:"companyId"`
-	jwt.RegisteredClaims
+type HapPointRequest struct {
+	Selfpoints int `json:"seif_points"`
+	Workpoints int `json:"work_points"`
+	Copoints   int `json:"co_worker_points"`
 }
+type HappinessPoint struct {
+	Id         int     `json:"id"`
+	Selfpoints int     `json:"seif_point"`
+	Workpoints int     `json:"work_point"`
+	Copoints   int     `json:"co_worker_point"`
+	TimeStamp  []uint8 `json:"timestamp"`
+}
+
 type Handler struct {
 	DB *sql.DB
 }
