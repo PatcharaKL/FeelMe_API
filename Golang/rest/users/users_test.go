@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -215,15 +218,15 @@ func TestHappinesspoint(t *testing.T) {
 		body         *bytes.Buffer
 		expectedCode int
 	}{
-		// {
-		// 	name: "testSucceed",
-		// 	body: bytes.NewBufferString(`{
-		// 		"seif_points": 20,
-		// 		"work_points": 4,
-		// 		"co_worker_points": 8
-		// 	}`),
-		// 	expectedCode: http.StatusCreated,
-		// },
+		{
+			name: "testSucceed",
+			body: bytes.NewBufferString(`{
+				"seif_points": 20,
+				"work_points": 4,
+				"co_worker_points": 8
+			}`),
+			expectedCode: http.StatusCreated,
+		},
 		{
 			name: "testUnauthorized",
 			body: bytes.NewBufferString(`{
@@ -280,9 +283,13 @@ func TestHappinesspoint(t *testing.T) {
 func setupTestServer(method, uri string, body *bytes.Buffer) (*httptest.ResponseRecorder, echo.Context) {
 	e := echo.New()
 	req := httptest.NewRequest(method, uri, body)
-	req.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6IjYyMDEwNzAzMDAyOEBkcHUuYWMudGgiLCJuYW1lIjoiU2F5ZmFyIiwic3VybmFtZSI6IkhvbmdzYWVuZyIsInJvbGUiOjMsImFjY291bnRJZCI6MiwiZGVwYXJ0bWVudElkIjoxLCJjb21wYW55SWQiOjEsImV4cCI6MTY3NTkzNjEwNn0.vJRq54zzPemK4wS55Ue-WRDgPIJeJthZUe4-S37sYZg")
+	token := GeneraterTokenAccessMockup()
+	req.Header.Set(echo.HeaderAuthorization, token)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
+	log.Print("------------------------------------------------------")
+	log.Print(req.Header.Get(echo.HeaderAuthorization))
+	log.Print("------------------------------------------------------")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
@@ -300,4 +307,23 @@ func TestNewApplicationInit(t *testing.T) {
 
 	// Assert
 	assert.Equal(t, expected, actual)
+}
+func GeneraterTokenAccessMockup() string {
+	type JwtCustomClaims struct {
+		Email        string `json:"email"`
+		Name         string `json:"name"`
+		Surname      string `json:"surname"`
+		Role         int    `json:"role"`
+		AccountId    int    `json:"accountId"`
+		DepartmentId int    `json:"departmentId"`
+		CompanyId    int    `json:"companyId"`
+		jwt.RegisteredClaims
+	}
+	claims := &JwtCustomClaims{"user1", "Patchara", "Kleebbua", 1, 1, 1,
+		1, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 5))},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	t, _ := token.SignedString([]byte(tokens.Signingkey))
+
+	return t
 }
