@@ -1,6 +1,7 @@
 package users
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -10,7 +11,15 @@ import (
 )
 
 func (h *Handler) HappinesspointHandler(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
+	user, ok := c.Get("user").(*jwt.Token)
+	log.Print("------------------------------------------------")
+	log.Printf("55555555555555555555555555: %v user: %v", ok, user)
+	log.Print("------------------------------------------------")
+	if !ok || user == nil {
+		// handle the case where the user is not authenticated
+		log.Print("------------------------ KUY ------------------------")
+		return c.JSON(http.StatusUnauthorized, "")
+	}
 	claims := user.Claims.(*tokens.JwtCustomClaims)
 	userId := claims.AccountId
 
@@ -29,4 +38,5 @@ func (h *Handler) HappinesspointHandler(c echo.Context) error {
 		"work_points":      hpyPointBody.Workpoints,
 		"co_worker_points": hpyPointBody.Copoints,
 	})
+
 }

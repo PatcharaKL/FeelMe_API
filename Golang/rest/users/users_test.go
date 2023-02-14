@@ -12,8 +12,9 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -258,6 +259,9 @@ func TestHappinesspoint(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			rec, c := setupTestServer(http.MethodPost, "/users/employees/:id/happiness-points", tt.body)
+			// log.Print("------------------------------------------------------")
+			// log.Print(c.Request().Header.Get("Authorization"))
+			// log.Print("------------------------------------------------------")
 			db, mock, err := sqlmock.New()
 			if err != nil {
 				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -270,8 +274,9 @@ func TestHappinesspoint(t *testing.T) {
 					WithArgs(1, 20, 4, 8, AnyTime{}).WillReturnRows(expected)
 			}
 			h := Handler{db}
-
-			err = h.HappinesspointHandler(c)
+			err = middleware.JWTWithConfig(middleware.JWTConfig{
+				SigningKey: []byte(tokens.Signingkey),
+			})(h.HappinesspointHandler)(c)
 
 			if assert.NoError(t, err) {
 				assert.Equal(t, tt.expectedCode, rec.Code)
@@ -283,15 +288,26 @@ func TestHappinesspoint(t *testing.T) {
 func setupTestServer(method, uri string, body *bytes.Buffer) (*httptest.ResponseRecorder, echo.Context) {
 	e := echo.New()
 	req := httptest.NewRequest(method, uri, body)
-	token := GeneraterTokenAccessMockup()
-	req.Header.Set(echo.HeaderAuthorization, token)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
-	log.Print("------------------------------------------------------")
-	log.Print(req.Header.Get(echo.HeaderAuthorization))
-	log.Print("------------------------------------------------------")
+	// token := GeneraterTokenAccessMockup()
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "1234567890"
+	claims["name"] = "John Doe"
+	claims["iat"] = 1516239022
+	claims["exp"] = 1516239122
+	signedToken, _ := token.SignedString([]byte(tokens.Signingkey))
+	// Create a new JWT token to use in the test.
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+signedToken)
+	// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+
 	rec := httptest.NewRecorder()
+	// Create a new JWT token to use in the test.
+
 	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+	log.Printf("------------> %v", c.Get("user").(*jwt.Token))
 
 	return rec, c
 }
@@ -308,22 +324,23 @@ func TestNewApplicationInit(t *testing.T) {
 	// Assert
 	assert.Equal(t, expected, actual)
 }
-func GeneraterTokenAccessMockup() string {
-	type JwtCustomClaims struct {
-		Email        string `json:"email"`
-		Name         string `json:"name"`
-		Surname      string `json:"surname"`
-		Role         int    `json:"role"`
-		AccountId    int    `json:"accountId"`
-		DepartmentId int    `json:"departmentId"`
-		CompanyId    int    `json:"companyId"`
-		jwt.RegisteredClaims
-	}
-	claims := &JwtCustomClaims{"user1", "Patchara", "Kleebbua", 1, 1, 1,
-		1, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 5))},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	t, _ := token.SignedString([]byte(tokens.Signingkey))
 
-	return t
-}
+// func GeneraterTokenAccessMockup() *jwt.Token {
+// 	type JwtCustomClaims struct {
+// 		Email        string `json:"email"`
+// 		Name         string `json:"name"`
+// 		Surname      string `json:"surname"`
+// 		Role         int    `json:"role"`
+// 		AccountId    int    `json:"accountId"`
+// 		DepartmentId int    `json:"departmentId"`
+// 		CompanyId    int    `json:"companyId"`
+// 		jwt.RegisteredClaims
+// 	}
+// 	claims := &JwtCustomClaims{"user1", "Patchara", "Kleebbua", 1, 1, 1,
+// 		1, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 5))},
+// 	}
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	// t, _ := token.SignedString([]byte(tokens.Signingkey))
+
+// 	return token
+// }
