@@ -116,7 +116,7 @@ func TestNewToken(t *testing.T) {
 					if tt.name != "testExecError" {
 						expectPrepare.ExpectExec().WithArgs(false, "6f388eca-e72e-4461-a478-172f50a7cbaf").WillReturnResult(sqlmock.NewResult(0, 0))
 						if tt.name != "testCreateRowError" {
-							mock.ExpectQuery("INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?);").WithArgs(AnyToken{}, 1, AnyTime{}, true).WillReturnRows(newReToen)
+							mock.ExpectQuery("INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?) RETURNING refreshToken;").WithArgs(AnyToken{}, 1, AnyTime{}, true).WillReturnRows(newReToen)
 						}
 					}
 				}
@@ -126,6 +126,7 @@ func TestNewToken(t *testing.T) {
 			err = h.NewTokenHandler(c)
 			if assert.NoError(t, err) {
 				assert.Equal(t, tt.expectedCode, rec.Code)
+				t.Log(rec.Body)
 			}
 		})
 	}

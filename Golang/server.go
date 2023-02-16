@@ -21,6 +21,7 @@ import (
 func middlewareHandler(e *echo.Echo) {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
 }
 func endpointTokenHandler(e *echo.Echo, h *tokens.Handler) {
 	e.POST("/newtoken", h.NewTokenHandler)
@@ -30,14 +31,15 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	r := e.Group("/users")
 	e.POST("/login", h.UserLoginHandler)
 	e.POST("/logout", h.UserLogOutHandler)
+
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
-			return new(users.JwtCustomClaims)
+			return new(tokens.JwtCustomClaims)
 		},
 		SigningKey: []byte(tokens.Signingkey),
 	}
 	r.Use(echojwt.WithConfig(config))
-
+	r.POST("/employees/:id/happiness-points", h.HappinesspointHandler)
 }
 func main() {
 	db := models.InitDB()

@@ -1,7 +1,6 @@
 package tokens
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -17,12 +16,7 @@ func (h *Handler) NewTokenHandler(c echo.Context) error {
 	}
 	tk := new(Token)
 	row := h.DB.QueryRow(getRefresh, reToken.Refreshtoken, true, time.Now())
-
-	//! ----------
 	if err := row.Scan(&tk.Refreshtokens, &tk.AccountId, &tk.Exp, &tk.IsValid); err != nil {
-		log.Print("------------")
-		log.Print(err)
-		log.Print("------------")
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 
@@ -40,12 +34,15 @@ func (h *Handler) NewTokenHandler(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 	if _, err := stmt.Exec(false, tk.Refreshtokens); err != nil {
+
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 	ckRefreshToken := ""
 	if err := h.DB.QueryRow(createRefreshToken, refreshToken, ac.AccountId, time.Now().Add(time.Hour*360), true).Scan(&ckRefreshToken); err != nil {
+
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
+
 	return c.JSON(http.StatusOK, echo.Map{
 		"accessToken":  token,
 		"refreshToken": refreshToken,
