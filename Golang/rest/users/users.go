@@ -9,6 +9,7 @@ import (
 const (
 	getAccountByEmail          = "SELECT * FROM accounts WHERE email=?"
 	getAccountById             = "SELECT * FROM accounts WHERE account_id=?"
+	getUserDetail              = "SELECT * FROM accounts"
 	getRefreshTokenByAccountId = "SELECT refreshToken FROM refresh_token WHERE account_id=? && isValid=?"
 	createRefreshToken         = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
 	updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
