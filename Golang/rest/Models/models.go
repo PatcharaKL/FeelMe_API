@@ -20,3 +20,11 @@ type Account struct {
 	PositionId   int            `json:"posirion_id" query:"posirion_id"`
 	CompanyId    int            `json:"company_id" query:"company_id"`
 }
+type HappinessPoint struct {
+	Id         int     `json:"id" query:"id"`
+	AccountId  int     `json:"account_id" query:"account_id"`
+	Selfpoints int     `json:"seif_point"`
+	Workpoints int     `json:"work_point"`
+	Copoints   int     `json:"co_worker_point"`
+	TimeStamp  []uint8 `json:"timestamp"`
+}

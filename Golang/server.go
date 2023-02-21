@@ -40,6 +40,7 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	}
 	r.Use(echojwt.WithConfig(config))
 	r.POST("/employees/:id/happiness-points", h.HappinesspointHandler)
+	e.GET("/users/employees/:id/:period/happiness-points", h.GetHappinessByUserId)
 }
 func main() {
 	db := models.InitDB()
