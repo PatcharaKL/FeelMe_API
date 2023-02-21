@@ -52,10 +52,10 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 	listHappiness := new(ResponseGetHappines)
 	happiness := new(models.HappinessPoint)
 	hpPoint := new(Record)
-	// userId := c.Param("id")
-	// period := c.Param("period")
-	userId := "2"
-	period := ":period"
+	userId := c.Param("id")
+	period := c.Param("period")
+	// userId := "2"
+	// period := ":period"
 	if period == ":period" {
 		rows, err := h.DB.Query(getHappinessByUserId, userId)
 		if err != nil {
@@ -141,6 +141,8 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 	}
 	if len(listHappiness.Records) != 0 {
 		return c.JSON(http.StatusOK, listHappiness)
+	} else if len(listHappiness.Records) == 0 {
+		return c.String(http.StatusNoContent, "")
 	}
 	return c.String(http.StatusBadRequest, "")
 }
