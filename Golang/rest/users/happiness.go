@@ -54,8 +54,6 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 	hpPoint := new(Record)
 	userId := c.Param("id")
 	period := c.Param("period")
-	// userId := "2"
-	// period := ":period"
 	if period == ":period" {
 		rows, err := h.DB.Query(getHappinessByUserId, userId)
 		if err != nil {
