@@ -21,13 +21,6 @@ type HapPointRequest struct {
 	Workpoints int `json:"work_points"`
 	Copoints   int `json:"co_worker_points"`
 }
-type HappinessPoint struct {
-	Id         int     `json:"id"`
-	Selfpoints int     `json:"seif_point"`
-	Workpoints int     `json:"work_point"`
-	Copoints   int     `json:"co_worker_point"`
-	TimeStamp  []uint8 `json:"timestamp"`
-}
 
 type Handler struct {
 	DB *sql.DB
