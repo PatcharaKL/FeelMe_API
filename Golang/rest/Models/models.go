@@ -32,7 +32,7 @@ type Position struct {
 	PositionId   int     `json:"position_id" query:"position_id"`
 	PositionName string  `json:"position_name" query:"position_name"`
 	Created      []uint8 `json:"created" query:"created"`
-
+}
 type HappinessPoint struct {
 	Id         int     `json:"id" query:"id"`
 	AccountId  int     `json:"account_id" query:"account_id"`
@@ -40,5 +40,4 @@ type HappinessPoint struct {
 	Workpoints int     `json:"work_point"`
 	Copoints   int     `json:"co_worker_point"`
 	TimeStamp  []uint8 `json:"timestamp"`
-
 }

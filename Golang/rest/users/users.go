@@ -7,13 +7,14 @@ import (
 )
 
 const (
-	getAccountByEmail          = "SELECT * FROM accounts WHERE email=?"
-	getAccountById             = "SELECT * FROM accounts WHERE account_id=?"
-	getUserDetail              = "SELECT account_id,name,surname,hp,level,avatar_url,positions.position_name FROM feelme_db.accounts join feelme_db.positions ON feelme_db.positions.position_id = feelme_db.accounts.position_id;"
-	getRefreshTokenByAccountId = "SELECT refreshToken FROM refresh_token WHERE account_id=? && isValid=?"
-	createRefreshToken         = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
-	updateStatusRefreshToken   = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
-	createdHappinessPoint      = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
+	getAccountByEmail           = "SELECT * FROM accounts WHERE email=?"
+	getHappinessByUserId        = "SELECT * FROM deily_happiness_points WHERE  account_id=?"
+	getHappinessByUserIdAndDate = "SELECT * FROM deily_happiness_points WHERE  account_id=? && timestamp <= ? && timestamp >= ?"
+	getUserDetail               = "SELECT account_id,name,surname,hp,level,avatar_url,positions.position_name FROM feelme_db.accounts join feelme_db.positions ON feelme_db.positions.position_id = feelme_db.accounts.position_id;"
+	getRefreshTokenByAccountId  = "SELECT refreshToken FROM refresh_token WHERE account_id=? && isValid=?"
+	createRefreshToken          = `INSERT INTO refresh_token (refreshToken, account_id, exp, isValid) VALUES (?, ?, ?, ?)RETURNING refreshToken;`
+	updateStatusRefreshToken    = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
+	createdHappinessPoint       = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
 )
 
 type HapPointRequest struct {
