@@ -54,6 +54,39 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 	hpPoint := new(Record)
 	userId := c.Param("id")
 	period := c.Param("period")
+	if period != ":period" {
+		startDate := ""
+		stopDate := ""
+		if period == "weeky" {
+			startDate = time.Now().UTC().Format(YYYYMMDD)
+			stopDate = time.Now().Add(time.Hour * -168).UTC().Format(YYYYMMDD)
+		}
+		if period == "month" {
+			startDate = time.Now().UTC().Format(YYYYMMDD)
+			stopDate = time.Now().Add(time.Hour * -720).UTC().Format(YYYYMMDD)
+		}
+		if period == "day" {
+			startDate = time.Now().UTC().Format(YYYYMMDD)
+			stopDate = time.Now().UTC().Format(YYYYMMDD)
+		}
+		rows, err := h.DB.Query(getHappinessByUserIdAndDate, userId, startDate, stopDate)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		listHappiness.Id, _ = strconv.Atoi(userId)
+		listHappiness.Period = period
+		for rows.Next() {
+			if err := rows.Scan(&happiness.Id, &happiness.AccountId, &happiness.Selfpoints,
+				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
+			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
+			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
+			hpPoint.Date = string(happiness.TimeStamp)
+			listHappiness.Records = append(listHappiness.Records, *hpPoint)
+		}
+	}
 	if period == ":period" {
 		rows, err := h.DB.Query(getHappinessByUserId, userId)
 		if err != nil {
@@ -72,70 +105,6 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 			hpPoint.Date = string(happiness.TimeStamp)
 			listHappiness.Records = append(listHappiness.Records, *hpPoint)
 		}
-	} else if period == "weeky" {
-		startDate := time.Now().UTC().Format(YYYYMMDD)
-		stopDate := time.Now().Add(time.Hour * -168).UTC().Format(YYYYMMDD)
-		rows, err := h.DB.Query(getHappinessByUserIdAndDate, userId, startDate, stopDate)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-		}
-		listHappiness.Id, _ = strconv.Atoi(userId)
-		listHappiness.Period = period
-		for rows.Next() {
-			if err := rows.Scan(&happiness.Id, &happiness.AccountId, &happiness.Selfpoints,
-				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
-			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
-			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
-			hpPoint.Date = string(happiness.TimeStamp)
-			listHappiness.Records = append(listHappiness.Records, *hpPoint)
-		}
-	} else if period == "month" {
-		startDate := time.Now().UTC().Format(YYYYMMDD)
-		stopDate := time.Now().Add(time.Hour * -720).UTC().Format(YYYYMMDD)
-		rows, err := h.DB.Query(getHappinessByUserIdAndDate, userId, startDate, stopDate)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-		}
-		listHappiness.Id, _ = strconv.Atoi(userId)
-		listHappiness.Period = period
-
-		for rows.Next() {
-			if err := rows.Scan(&happiness.Id, &happiness.AccountId, &happiness.Selfpoints,
-				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
-			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
-			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
-			hpPoint.Date = string(happiness.TimeStamp)
-			listHappiness.Records = append(listHappiness.Records, *hpPoint)
-		}
-	} else if period == "day" {
-		startDate := time.Now().UTC().Format(YYYYMMDD)
-		stopDate := time.Now().UTC().Format(YYYYMMDD)
-		rows, err := h.DB.Query(getHappinessByUserIdAndDate, userId, startDate, stopDate)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-		}
-
-		listHappiness.Id, _ = strconv.Atoi(userId)
-		listHappiness.Period = period
-		for rows.Next() {
-			if err := rows.Scan(&happiness.Id, &happiness.AccountId, &happiness.Selfpoints,
-				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
-			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
-			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
-			hpPoint.Date = string(happiness.TimeStamp)
-			listHappiness.Records = append(listHappiness.Records, *hpPoint)
-
-		}
-
 	}
 	if len(listHappiness.Records) != 0 {
 		return c.JSON(http.StatusOK, listHappiness)
