@@ -55,24 +55,19 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 }
 func UpdateStatusRefreshToken(h *Handler, accountId int) error {
 	rows, err := h.DB.Query(getRefreshTokenByAccountId, accountId, true)
+	tk := ""
 	if err != nil {
 		return err
 	}
-	reks := []string{}
 	for rows.Next() {
-		tk := ""
 		if err := rows.Scan(&tk); err != nil {
 			return err
 		}
-		reks = append(reks, tk)
-	}
-	for i := 0; i < len(reks); i++ {
 		stmt, err := h.DB.Prepare(updateStatusRefreshToken)
 		if err != nil {
 			return err
 		}
-
-		if _, err := stmt.Exec(false, reks[i]); err != nil {
+		if _, err := stmt.Exec(false, tk); err != nil {
 			return err
 		}
 	}
