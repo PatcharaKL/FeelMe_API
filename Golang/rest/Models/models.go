@@ -20,6 +20,19 @@ type Account struct {
 	PositionId   int            `json:"posirion_id" query:"posirion_id"`
 	CompanyId    int            `json:"company_id" query:"company_id"`
 }
+
+type Log struct {
+	LogID     int     `json:"log_id" query:"log_id"`
+	AccountId int     `json:"account_id" query:"account_id"`
+	Types     int     `json:"type" query:"type"`
+	Amount    int     `json:"amount" query:"amount"`
+	DateTime  []uint8 `json:"datetime" query:"datetime"`
+}
+type Position struct {
+	PositionId   int     `json:"position_id" query:"position_id"`
+	PositionName string  `json:"position_name" query:"position_name"`
+	Created      []uint8 `json:"created" query:"created"`
+}
 type HappinessPoint struct {
 	Id         int     `json:"id" query:"id"`
 	AccountId  int     `json:"account_id" query:"account_id"`

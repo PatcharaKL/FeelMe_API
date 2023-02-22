@@ -39,6 +39,8 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 		SigningKey: []byte(tokens.Signingkey),
 	}
 	r.Use(echojwt.WithConfig(config))
+
+	r.GET("/employees/", h.GetAllUserHandler)
 	r.POST("/employees/:id/happiness-points", h.HappinesspointHandler)
 	r.GET("/employees/:id/:period/happiness-points", h.GetHappinessByUserId)
 }
