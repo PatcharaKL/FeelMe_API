@@ -86,8 +86,7 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 			hpPoint.Date = string(happiness.TimeStamp)
 			listHappiness.Records = append(listHappiness.Records, *hpPoint)
 		}
-	}
-	if period == ":period" {
+	} else if period == ":period" {
 		rows, err := h.DB.Query(getHappinessByUserId, userId)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
@@ -108,8 +107,6 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 	}
 	if len(listHappiness.Records) != 0 {
 		return c.JSON(http.StatusOK, listHappiness)
-	} else if len(listHappiness.Records) == 0 {
-		return c.String(http.StatusNoContent, "")
 	}
-	return c.String(http.StatusBadRequest, "")
+	return c.String(http.StatusNoContent, "")
 }
