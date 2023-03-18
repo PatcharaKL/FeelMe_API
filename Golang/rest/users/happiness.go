@@ -55,7 +55,7 @@ type Value struct {
 }
 
 func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, error) {
-	http_name := fmt.Sprintf("http://127.0.0.1:8000/v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
+	http_name := fmt.Sprintf("http://fuzzy-api:8000/v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
 	vauel := new(Value)
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", http_name, nil)
