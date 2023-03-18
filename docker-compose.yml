@@ -17,8 +17,8 @@ services:
     build:
       context: ./Golang
       dockerfile: ./Dockerfile
-    # volumes:
-    #   - $PWD:/go/src/target
+    volumes:
+      - $PWD:/go/src/target
     container_name: feelme-api
     expose:
       - 5000
@@ -26,7 +26,7 @@ services:
     networks:
       - nginx-network
 
-  fuzzy_api:
+  fuzzy-api:
     build:
       context: './python'
       dockerfile: dockerfile
@@ -41,4 +41,3 @@ networks:
   nginx-network:
     driver: bridge
   
-    
