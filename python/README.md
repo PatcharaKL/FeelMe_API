@@ -35,4 +35,16 @@ To run test
 pytest
 ```
 
+To build fm-fuzzy image, from /python run
+
+```bash
+docker build -t fm-fuzz .
+```
+
+To run docker container
+
+```bash
+docker run -d --name fm-fuzz -p 80:80 fm-fuzz-ms
+```
+
 and that's it, have fun coding!
