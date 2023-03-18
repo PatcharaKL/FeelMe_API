@@ -41,10 +41,10 @@ To build fm-fuzzy image, from /python run
 docker build -t fm-fuzz .
 ```
 
-To run docker container
+To run docker-compose, in root dir run
 
 ```bash
-docker run -d --name fm-fuzz -p 80:80 fm-fuzz-ms
+docker-compose up -d --build
 ```
 
 and that's it, have fun coding!
