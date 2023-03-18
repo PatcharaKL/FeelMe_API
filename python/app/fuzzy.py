@@ -47,4 +47,4 @@ def fuzzy_cal(self_hp, work_hp, co_worker_hp):
 
     print(scoring.output['score'])
 
-    return scoring.output['score']
+    return round(scoring.output['score'])
