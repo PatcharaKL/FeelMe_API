@@ -1,4 +1,5 @@
 version: '3.9'
+
 services:
   nginx:
     image: nginx:stable-alpine
@@ -8,20 +9,36 @@ services:
       - 80:80
     restart: unless-stopped
     depends_on:
-      - api
+      - golang-api
     networks:
       - nginx-network
 
-  api:
+  golang-api:
     build:
-      context: './dotnet'
-      dockerfile: Dockerfile
-    container_name: feelMe-api
+      context: ./Golang
+      dockerfile: ./Dockerfile
+    # volumes:
+    #   - $PWD:/go/src/target
+    container_name: feelme-api
     expose:
       - 5000
+    restart: "unless-stopped"
+    networks:
+      - nginx-network
+
+  fuzzy_api:
+    build:
+      context: './python'
+      dockerfile: dockerfile
+    container_name: fuzzy-api
+    expose:
+        - 8000
     restart: unless-stopped
     networks:
       - nginx-network
+
 networks:
   nginx-network:
     driver: bridge
+  
+    
