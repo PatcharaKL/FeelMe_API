@@ -1,1 +1,1 @@
-source venv/bin/activate
+source fm-fuzz-venv/bin/activate
