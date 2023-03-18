@@ -23,10 +23,10 @@ pip install -r ./requirements.txt
 source venv.sh
 ```
 
-and to start server, simply run
+and to start server, in /python simply run
 
 ```bash
-uvicorn main:app --reload --app-dir app
+uvicorn app.main:app --reload --app-dir app
 ```
 
 and that's it, have fun coding!
