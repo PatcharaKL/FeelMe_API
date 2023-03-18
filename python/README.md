@@ -26,7 +26,13 @@ source venv.sh
 and to start server, in /python simply run
 
 ```bash
-uvicorn app.main:app --reload --app-dir app
+uvicorn app.main:app --reload
+```
+
+To run test
+
+```bash
+pytest
 ```
 
 and that's it, have fun coding!
