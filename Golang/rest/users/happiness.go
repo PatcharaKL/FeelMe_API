@@ -15,6 +15,8 @@ const YYYYMMDD = "2006-01-02"
 const HTTP = "http://fuzzy-api:8000/"
 const LocalHTTP = "http://127.0.0.1:8000/"
 
+var check = false
+
 func (h *Handler) HappinesspointHandler(c echo.Context) error {
 
 	userId := c.Param("id")
@@ -57,21 +59,30 @@ type Value struct {
 }
 
 func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, error) {
-	http_name := fmt.Sprintf("http: //127.0.0.1:8000/v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
+	http_name := ""
+	if check != true {
+		http_name = LocalHTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
+	} else {
+		http_name = HTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
+	}
 	vauel := new(Value)
 	req, err := http.Get(http_name)
 	if err != nil {
-		http_name = fmt.Sprintf("http://fuzzy-api:8000/v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
-
-		if req, err = http.Get(http_name); err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 	json.NewDecoder(req.Body).Decode(vauel)
 	return vauel, nil
 }
 
+func CheckHTTP() bool {
+	if _, err := http.Get(LocalHTTP); err != nil {
+		check = true
+	}
+	return check
+}
+
 func (h *Handler) GetHappinessByUserId(c echo.Context) error {
+	CheckHTTP()
 	listHappiness := new(ResponseGetHappines)
 	happiness := new(models.HappinessPoint)
 	hpPoint := new(Record)
