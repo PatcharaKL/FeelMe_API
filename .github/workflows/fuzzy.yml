@@ -1,10 +1,9 @@
 #main.yml
 #This workflow will install Python dependencies, lint using Black, run tests using Pytest
 #and Deploy the FastAPI app to Heroku
-name: fastapi-github-actions-test
+name: Fuzzy
 
 on:
-  #Trigger the workflow on a push event to the master branch only
   push: [push]
 
 #A workflow job running sequentially

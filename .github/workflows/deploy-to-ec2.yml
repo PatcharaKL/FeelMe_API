@@ -2,7 +2,7 @@ name: Deploy-to-EC2
 
 on:
   workflow_run:
-    workflows: [GoPackage, Build]
+    workflows: [GoPackage, Build, Fuzzy]
     branch: [main]
     types:
       - completed
