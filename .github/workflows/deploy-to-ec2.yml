@@ -3,9 +3,8 @@ name: Deploy-to-EC2
 on:
   workflow_run:
     branches: [main]
-    workflows: ["GoPackage", "Build", "Fuzzy"]
-    types:
-      - completed
+    workflows: ["GoPackage", "Fuzzy"]
+    types: [completed]
 
 jobs:
   on-success:
