@@ -12,8 +12,8 @@ import (
 )
 
 const YYYYMMDD = "2006-01-02"
-const HTTP = "http://fuzzy-api:8000/"
-const LocalHTTP = "http://127.0.0.1:8000/"
+
+var HTTP = "http://127.0.0.1:8000/"
 
 var check = false
 
@@ -59,12 +59,7 @@ type Value struct {
 }
 
 func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, error) {
-	http_name := ""
-	if check != true {
-		http_name = LocalHTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
-	} else {
-		http_name = HTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
-	}
+	http_name := HTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
 	vauel := new(Value)
 	req, err := http.Get(http_name)
 	if err != nil {
@@ -74,11 +69,11 @@ func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, e
 	return vauel, nil
 }
 
-func CheckHTTP() bool {
-	if _, err := http.Get(LocalHTTP); err != nil {
+func CheckHTTP() {
+	if _, err := http.Get(HTTP); err != nil {
 		check = true
+		HTTP = "http://fuzzy-api:8000/"
 	}
-	return check
 }
 
 func (h *Handler) GetHappinessByUserId(c echo.Context) error {
@@ -94,12 +89,10 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 		if period == "weeky" {
 			startDate = time.Now().UTC().Format(YYYYMMDD)
 			stopDate = time.Now().Add(time.Hour * -168).UTC().Format(YYYYMMDD)
-		}
-		if period == "month" {
+		} else if period == "month" {
 			startDate = time.Now().UTC().Format(YYYYMMDD)
 			stopDate = time.Now().Add(time.Hour * -720).UTC().Format(YYYYMMDD)
-		}
-		if period == "day" {
+		} else if period == "day" {
 			startDate = time.Now().UTC().Format(YYYYMMDD)
 			stopDate = time.Now().UTC().Format(YYYYMMDD)
 		}
