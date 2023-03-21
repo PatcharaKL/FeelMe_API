@@ -3,8 +3,7 @@
 #and Deploy the FastAPI app to Heroku
 name: Fuzzy
 
-on:
-  push: [push]
+on: [push]
 
 #A workflow job running sequentially
 jobs:
