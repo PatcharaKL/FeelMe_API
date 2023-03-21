@@ -30,8 +30,8 @@ jobs:
           python -m pip pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-steps:
-  - name: Test with pytest
-    run: |
-      cd python/
-      pytest
+    steps:
+      - name: Test with pytest
+        run: |
+          cd python/
+          pytest
