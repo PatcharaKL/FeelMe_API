@@ -1,0 +1,15 @@
+# Stage 1: build environment
+FROM python:3.9 AS build
+WORKDIR /code
+COPY ./requirements.txt /code/requirements.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip wheel --no-cache-dir --no-deps --wheel-dir /code/wheels -r /code/requirements.txt
+
+# Stage 2: production environment
+FROM python:3.9-slim AS production
+WORKDIR /code
+COPY --from=build /code/wheels /wheels
+COPY ./app /code/app
+RUN pip install --no-cache /wheels/* \
+    && rm -rf /wheels
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

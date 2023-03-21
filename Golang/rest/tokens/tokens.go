@@ -28,13 +28,10 @@ type Token struct {
 	IsValid       bool    `json:"isValid" form:"isValid" query:"isValid"`
 }
 type JwtCustomClaims struct {
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Surname      string `json:"surname"`
-	Role         int    `json:"role"`
-	AccountId    int    `json:"accountId"`
-	DepartmentId int    `json:"departmentId"`
-	CompanyId    int    `json:"companyId"`
+	Role         int `json:"role"`
+	AccountId    int `json:"accountId"`
+	DepartmentId int `json:"departmentId"`
+	CompanyId    int `json:"companyId"`
 	jwt.RegisteredClaims
 }
 type Handler struct {
@@ -58,7 +55,7 @@ func GeneraterRefreshToken() string {
 	return strings.Join(refreshToken, "-")
 }
 func GeneraterTokenAccess(ac models.Account) string {
-	claims := &JwtCustomClaims{ac.Email, ac.Name, ac.Surname, ac.PositionId, ac.AccountId, ac.DepartmentId,
+	claims := &JwtCustomClaims{ac.PositionId, ac.AccountId, ac.DepartmentId,
 		ac.CompanyId, jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 5))},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

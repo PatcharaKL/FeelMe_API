@@ -1,6 +1,8 @@
 package users
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -34,9 +36,10 @@ func (h *Handler) HappinesspointHandler(c echo.Context) error {
 }
 
 type Hppoint struct {
-	SelfPoints     int `json:"self_points"`
-	WorkPoints     int `json:"work_points"`
-	CoWorkerPoints int `json:"co_worker_points"`
+	SelfPoints     int     `json:"self_points"`
+	WorkPoints     int     `json:"work_points"`
+	CoWorkerPoints int     `json:"co_worker_points"`
+	FuzzyValue     float64 `json:"fuzzy_value"`
 }
 type Record struct {
 	Hppoints Hppoint `json:"happiness_points"`
@@ -46,6 +49,22 @@ type ResponseGetHappines struct {
 	Id      int      `json:"id"`
 	Period  string   `json:"period"`
 	Records []Record `json:"record"`
+}
+type Value struct {
+	Value float64 `json:"value"`
+}
+
+func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, error) {
+	http_name := fmt.Sprintf("http://fuzzy-api:8000/v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
+	vauel := new(Value)
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", http_name, nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
+	json.NewDecoder(resp.Body).Decode(vauel)
+	return vauel, nil
 }
 
 func (h *Handler) GetHappinessByUserId(c echo.Context) error {
@@ -80,9 +99,14 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
+			fuzzy, err := FuzzyCalculator(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
 			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
 			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
 			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
+			hpPoint.Hppoints.FuzzyValue = fuzzy.Value
 			hpPoint.Date = string(happiness.TimeStamp)
 			listHappiness.Records = append(listHappiness.Records, *hpPoint)
 		}
@@ -98,9 +122,14 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
+			fuzzy, err := FuzzyCalculator(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
 			hpPoint.Hppoints.SelfPoints = happiness.Selfpoints
 			hpPoint.Hppoints.WorkPoints = happiness.Workpoints
 			hpPoint.Hppoints.CoWorkerPoints = happiness.Copoints
+			hpPoint.Hppoints.FuzzyValue = fuzzy.Value
 			hpPoint.Date = string(happiness.TimeStamp)
 			listHappiness.Records = append(listHappiness.Records, *hpPoint)
 		}

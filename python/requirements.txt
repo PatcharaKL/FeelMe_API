@@ -1,0 +1,8 @@
+fastapi>=0.94.1
+numpy>=1.24.2
+pydantic>=1.10.6
+scikit_fuzzy>=0.4.2
+uvicorn>=0.21.0
+matplotlib>=3.7.1
+httpx>=0.23.3
+pytest>=7.2.2
