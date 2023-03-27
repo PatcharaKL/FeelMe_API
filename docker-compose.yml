@@ -17,8 +17,6 @@ services:
     build:
       context: ./Golang
       dockerfile: ./Dockerfile
-    volumes:
-      - $PWD:/go/src/target
     container_name: feelme-api
     expose:
       - 5000
