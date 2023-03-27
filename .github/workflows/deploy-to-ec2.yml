@@ -3,28 +3,26 @@ name: Deploy-to-EC2
 on:
   workflow_run:
     branches: [main]
-    workflows: ["GoPackage", "Build", "Fuzzy"]
-    types:
-      - completed
+    workflows: ["GoPackage", "Fuzzy"]
+    types: [completed]
 
 jobs:
   on-success:
-    deploy:
-      name: Deploy to EC2 on master branch push
-      runs-on: ubuntu-latest
-      if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy to EC2 on master branch push
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
-      steps:
-        - name: Checkout the files
-          uses: actions/checkout@v2
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v2
 
-        - name: Deploy to Server 1
-          uses: easingthemes/ssh-deploy@main
-          env:
-            SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-            REMOTE_HOST: ${{ secrets.HOST_DNS }}
-            REMOTE_USER: ${{ secrets.USERNAME }}
-            TARGET: ${{ secrets.TARGET_DIR }}
+      - name: Deploy to Server 1
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.HOST_DNS }}
+          REMOTE_USER: ${{ secrets.USERNAME }}
+          TARGET: ${{ secrets.TARGET_DIR }}
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
