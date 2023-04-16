@@ -21,6 +21,7 @@ type User struct {
 
 func (h *Handler) GetAllUserHandler(c echo.Context) error {
 	userId := c.QueryParam("accountId")
+	search := c.QueryParam("search")
 	ac := new(models.Account)
 	ps := new(models.Position)
 	dm := new(models.Department)
@@ -34,6 +35,29 @@ func (h *Handler) GetAllUserHandler(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 		}
 		data.AvatarUrl = ac.AvatarUrl.String
+		return c.JSON(http.StatusOK, data)
+	}
+	if search != "" {
+		search = search + "%"
+		rows, err := h.DB.Query(getUserSearchByName, search)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+		}
+		for rows.Next() {
+			if err := rows.Scan(&ac.AccountId, &ac.Name, &ac.Surname, &ac.Hp, &ac.Level, &ac.AvatarUrl, &ps.PositionName, &dm.DepartmentName, &cp.CompanyName); err != nil {
+				return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+			}
+			user.AccountId = ac.AccountId
+			user.AvatarUrl = ac.AvatarUrl.String
+			user.Name = ac.Name
+			user.Surname = ac.Surname
+			user.Hp = ac.Hp
+			user.Level = ac.Level
+			user.PositionName = ps.PositionName
+			user.DepartmentName = dm.DepartmentName
+			user.CompanyName = cp.CompanyName
+			data = append(data, *user)
+		}
 		return c.JSON(http.StatusOK, data)
 	}
 	rows, err := h.DB.Query(getUserDetail)

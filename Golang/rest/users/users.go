@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	getAccountByEmail    = "SELECT * FROM accounts WHERE email=?"
-	getHappinessByUserId = "SELECT * FROM deily_happiness_points WHERE  account_id=?;"
-
+	getAccountByEmail           = "SELECT * FROM accounts WHERE email=?"
+	getHappinessByUserId        = "SELECT * FROM deily_happiness_points WHERE  account_id=?;"
+	getUserSearchByName         = "SELECT account_id,name,surname,hp,level,avatar_url,positions.position_name,departments.department_name,companies.company_name FROM feelme_db.accounts join feelme_db.positions ON feelme_db.positions.position_id = feelme_db.accounts.position_id join feelme_db.departments ON feelme_db.departments.department_id = feelme_db.accounts.department_id join feelme_db.companies ON feelme_db.companies.company_id = feelme_db.accounts.company_id where name like ?;"
 	getHappinessByUserIdAndDate = "SELECT * FROM deily_happiness_points WHERE  account_id=? && timestamp <= ? && timestamp >= ?"
 	getUserDetail               = "SELECT account_id,name,surname,hp,level,avatar_url,positions.position_name,departments.department_name,companies.company_name FROM feelme_db.accounts join feelme_db.positions ON feelme_db.positions.position_id = feelme_db.accounts.position_id join feelme_db.departments ON feelme_db.departments.department_id = feelme_db.accounts.department_id join feelme_db.companies ON feelme_db.companies.company_id = feelme_db.accounts.company_id;"
 	getUserByUserId             = "SELECT account_id,name,surname,hp,level,avatar_url,positions.position_name,departments.department_name,companies.company_name FROM feelme_db.accounts join feelme_db.positions ON feelme_db.positions.position_id = feelme_db.accounts.position_id join feelme_db.departments ON feelme_db.departments.department_id = feelme_db.accounts.department_id join feelme_db.companies ON feelme_db.companies.company_id = feelme_db.accounts.company_id WHERE account_id=? ;"
