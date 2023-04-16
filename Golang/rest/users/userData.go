@@ -4,8 +4,6 @@ import (
 	"net/http"
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
-	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,12 +20,22 @@ type User struct {
 }
 
 func (h *Handler) GetAllUserHandler(c echo.Context) error {
+	userId := c.QueryParam("accountId")
 	ac := new(models.Account)
 	ps := new(models.Position)
 	dm := new(models.Department)
 	cp := new(models.Company)
 	var data []User
 	user := new(User)
+	if userId != "" {
+		data := new(User)
+		row := h.DB.QueryRow(getUserByUserId, userId)
+		if err := row.Scan(&data.AccountId, &data.Name, &data.Surname, &data.Hp, &data.Level, &ac.AvatarUrl, &data.PositionName, &data.DepartmentName, &data.CompanyName); err != nil {
+			return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+		}
+		data.AvatarUrl = ac.AvatarUrl.String
+		return c.JSON(http.StatusOK, data)
+	}
 	rows, err := h.DB.Query(getUserDetail)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
@@ -47,19 +55,5 @@ func (h *Handler) GetAllUserHandler(c echo.Context) error {
 		user.CompanyName = cp.CompanyName
 		data = append(data, *user)
 	}
-	return c.JSON(http.StatusOK, data)
-}
-
-func (h *Handler) GetUserDetailByUserId(c echo.Context) error {
-	user, _ := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(*tokens.JwtCustomClaims)
-	userId := claims.AccountId
-	data := new(User)
-	ac := new(models.Account)
-	row := h.DB.QueryRow(getUserByUserId, userId)
-	if err := row.Scan(&data.AccountId, &data.Name, &data.Surname, &data.Hp, &data.Level, &ac.AvatarUrl, &data.PositionName, &data.DepartmentName, &data.CompanyName); err != nil {
-		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
-	}
-	data.AvatarUrl = ac.AvatarUrl.String
 	return c.JSON(http.StatusOK, data)
 }
