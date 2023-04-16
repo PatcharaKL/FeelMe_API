@@ -51,6 +51,7 @@ func (h *Handler) UserLoginHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"accessToken":  token,
 		"refreshToken": refreshToken,
+		"account_id":   ac.AccountId,
 	})
 }
 func UpdateStatusRefreshToken(h *Handler, accountId int) error {

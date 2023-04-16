@@ -33,6 +33,17 @@ type Position struct {
 	PositionName string  `json:"position_name" query:"position_name"`
 	Created      []uint8 `json:"created" query:"created"`
 }
+type Department struct {
+	DepartmentId   int     `json:"department_id" query:"department_id"`
+	DepartmentName string  `json:"department_name" query:"department_name"`
+	Created        []uint8 `json:"created" query:"created"`
+	CompanyId      int     `json:"company_id" query:"company_id"`
+}
+type Company struct {
+	CompanyId   int     `json:"company_id" query:"company_id"`
+	CompanyName string  `json:"company_name" query:"company_name"`
+	Created     []uint8 `json:"created" query:"created"`
+}
 type HappinessPoint struct {
 	Id         int     `json:"id" query:"id"`
 	AccountId  int     `json:"account_id" query:"account_id"`

@@ -47,6 +47,7 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	r.GET("/employees/", h.GetAllUserHandler)
 	r.POST("/employees/:id/happiness-points", h.HappinesspointHandler)
 	r.GET("/employees/:id/:period/happiness-points", h.GetHappinessByUserId)
+
 }
 func main() {
 	db := models.InitDB()
