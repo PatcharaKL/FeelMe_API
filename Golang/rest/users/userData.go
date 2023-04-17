@@ -30,7 +30,7 @@ func (h *Handler) GetAllUserHandler(c echo.Context) error {
 	user := new(User)
 	if userId != "" {
 		data := new(User)
-		row := h.DB.QueryRow(getUserByUserId, userId)
+		row := h.DB.QueryRow(GetUserByUserId, userId)
 		if err := row.Scan(&data.AccountId, &data.Name, &data.Surname, &data.Hp, &data.Level, &ac.AvatarUrl, &data.PositionName, &data.DepartmentName, &data.CompanyName); err != nil {
 			return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 		}

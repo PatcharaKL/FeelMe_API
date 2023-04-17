@@ -9,6 +9,7 @@ import (
 	"time"
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+	"github.com/PatcharaKL/FeelMe_API/rest/actions"
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
 	"github.com/PatcharaKL/FeelMe_API/rest/users"
 	"github.com/golang-jwt/jwt/v4"
@@ -30,7 +31,17 @@ func middlewareHandler(e *echo.Echo) {
 func endpointTokenHandler(e *echo.Echo, h *tokens.Handler) {
 	e.POST("/newtoken", h.NewTokenHandler)
 }
-
+func endpointActionHandler(e *echo.Echo, h *actions.Handler) {
+	r := e.Group("/users")
+	config := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(tokens.JwtCustomClaims)
+		},
+		SigningKey: []byte(tokens.Signingkey),
+	}
+	r.Use(echojwt.WithConfig(config))
+	r.POST("/attack/damage", h.AttackDamage)
+}
 func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	r := e.Group("/users")
 	e.POST("/login", h.UserLoginHandler)
@@ -59,6 +70,7 @@ func main() {
 
 	endpointUserHandler(e, users.NewApplication(db))
 	endpointTokenHandler(e, tokens.NewApplication(db))
+	endpointActionHandler(e, actions.NewApplication(db))
 
 	go func() {
 		if err := e.Start(":5000"); err != nil && err != http.ErrServerClosed {

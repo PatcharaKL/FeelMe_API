@@ -24,7 +24,6 @@ type Account struct {
 type Log struct {
 	LogID     int     `json:"log_id" query:"log_id"`
 	AccountId int     `json:"account_id" query:"account_id"`
-	Types     int     `json:"type" query:"type"`
 	Amount    int     `json:"amount" query:"amount"`
 	DateTime  []uint8 `json:"datetime" query:"datetime"`
 }
