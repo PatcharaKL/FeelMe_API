@@ -46,13 +46,31 @@ func (h *Handler) AttackDamage(c echo.Context) error {
 		&user_detail.DepartmentName, &user_detail.CompanyName); err != nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
-	if user_detail.Hp-log.Amount <= 0 {
+	if user_detail.Hp == 0 {
 		res := Response{
 			Message: "Fail",
 			Status:  false,
-			Values:  "Hp - DamageAmount <= 0",
+			Values:  "Residual Hp of " + user_detail.Name + " " + user_detail.Surname + " = 0",
 		}
 		return c.JSON(http.StatusBadRequest, res)
+	}
+	if user_detail.Hp-log.Amount <= 0 {
+		stmt, err := h.DB.Prepare(users.UpdateUserData)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		if _, err := stmt.Exec(0, userId); err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		if err := h.DB.QueryRow(createLogAttackDamage, log.Amount, time.Now(), userId).Scan(&log_id); err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		res := Response{
+			Message: "Success",
+			Status:  true,
+			Values:  "Residual Hp of " + user_detail.Name + " " + user_detail.Surname + " = 0",
+		}
+		return c.JSON(http.StatusOK, res)
 	}
 	if user_detail.Hp-log.Amount >= 0 {
 		stmt, err := h.DB.Prepare(users.UpdateUserData)
