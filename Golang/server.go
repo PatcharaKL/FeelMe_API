@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	action "github.com/PatcharaKL/FeelMe_API/rest/Actions"
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
-	action "github.com/PatcharaKL/FeelMe_API/rest/actions"
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
 	"github.com/PatcharaKL/FeelMe_API/rest/users"
 	"github.com/golang-jwt/jwt/v4"
