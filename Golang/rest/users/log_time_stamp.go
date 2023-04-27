@@ -31,10 +31,8 @@ func (h *Handler) CheckIn(c echo.Context) error {
 	if err := row.Scan(&ac.Name, &ac.Surname); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
-	location, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
+	location := time.FixedZone("UTC+7", 7*60*60)
+
 	times := time.Now().In(location).Format(DDMMYYYYhhmmss)
 	fullName := ac.Name + " " + ac.Surname
 	if err := h.DB.QueryRow(createdLogTimeStamp, fullName, 1, claims.AccountId, times).Scan(&lgTime.Id); err != nil {
@@ -52,22 +50,14 @@ func (h *Handler) CheckOut(c echo.Context) error {
 	if err := c.Bind(hpyPointBody); err != nil {
 		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
 	}
-	// self_points, err_sp := strconv.Atoi(hpyPointBody.Selfpoints)
-	// co_points, err_cp := strconv.Atoi(hpyPointBody.Copoints)
-	// work_point, err_wp := strconv.Atoi(hpyPointBody.Workpoints)
-	// if err_sp != nil || err_cp != nil || err_wp != nil {
-	// 	return c.JSON(http.StatusBadRequest, "")
-	// }
 	ac := new(models.Account)
 	lgTime := new(LogTimeStamp)
 	row := h.DB.QueryRow(getUserFullNameByUserId, claims.AccountId)
 	if err := row.Scan(&ac.Name, &ac.Surname); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
-	location, err := time.LoadLocation("Asia/Bangkok")
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
+	location := time.FixedZone("UTC+7", 7*60*60)
+
 	times := time.Now().In(location).Format(DDMMYYYYhhmmss)
 	fullName := ac.Name + " " + ac.Surname
 	if err := h.DB.QueryRow(createdLogTimeStamp, fullName, 2, claims.AccountId, times).Scan(&lgTime.Id); err != nil {
