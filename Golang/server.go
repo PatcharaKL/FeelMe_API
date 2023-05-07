@@ -47,6 +47,7 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	e.POST("/login", h.UserLoginHandler)
 	e.POST("/logout", h.UserLogOutHandler)
 	e.GET("/health-check", h.HealthCheckHandler)
+	e.POST("/upload", h.UpdateUserImageProfile)
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(tokens.JwtCustomClaims)
