@@ -2,10 +2,9 @@ package users
 
 import (
 	"net/http"
-	"strings"
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
-	"github.com/google/uuid"
+	"github.com/PatcharaKL/FeelMe_API/service"
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,29 +20,22 @@ type User struct {
 	CompanyName    string `json:"company_name" query:"company_name"`
 }
 
-const (
-	// Create a new Blob Service Client using your Azure Storage account credentials
-	AccountName    = "feelme"
-	AccountKey     = "YInTKgO30iWulle6Q5GvUCBJnZG7A+H9MNHp22PmvaWZozjff9J3o86OT01+d9AezbqpIyC8Gw32+AStPonhyg=="
-	BlobServiceURL = "https://feelme.blob.core.windows.net"
-)
-
 func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	// Open the file
 	src, err := file.Open()
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 	defer src.Close()
-
 	fileName := file.Filename
-	arr := strings.Split(fileName, ".")
-	newFileName := uuid.New().String() + "." + arr[len(arr)-1]
-	return c.String(http.StatusOK, newFileName)
+	uploadFile, uploadErr := service.UploadService("feelme-image/profile", fileName, src)
+	if uploadErr != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: uploadErr.Error()})
+	}
+	return c.JSON(http.StatusOK, map[string]string{"url": uploadFile})
 }
 func (h *Handler) GetAllUserHandler(c echo.Context) error {
 	userId := c.QueryParam("accountId")
