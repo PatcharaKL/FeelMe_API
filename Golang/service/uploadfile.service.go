@@ -13,13 +13,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// const (
-// 	// Create a new Blob Service Client using your Azure Storage account credentials
-// 	accountName   = "feelme"
-// 	accountKey    = "YInTKgO30iWulle6Q5GvUCBJnZG7A+H9MNHp22PmvaWZozjff9J3o86OT01+d9AezbqpIyC8Gw32+AStPonhyg=="
-// 	containerName = "feelme-image/profile"
-// )
-
 func UploadService(dirName, fileName string, file multipart.File) (string, error) {
 	err := godotenv.Load(".env")
 	if err != nil {
