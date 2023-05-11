@@ -4,6 +4,9 @@ import (
 	"net/http"
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
+	"github.com/PatcharaKL/FeelMe_API/service"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,6 +22,35 @@ type User struct {
 	CompanyName    string `json:"company_name" query:"company_name"`
 }
 
+func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
+	user, _ := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*tokens.JwtCustomClaims)
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	src, err := file.Open()
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	defer src.Close()
+	fileName := file.Filename
+	uploadFile, uploadErr := service.UploadService("feelme-image/profile", fileName, src)
+	if uploadErr != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: uploadErr.Error()})
+	}
+	stmt, err := h.DB.Prepare(UpdateProfileImage)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	if _, err := stmt.Exec(uploadFile, claims.AccountId); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"Status":  true,
+		"Message": "Success",
+	})
+}
 func (h *Handler) GetAllUserHandler(c echo.Context) error {
 	userId := c.QueryParam("accountId")
 	search := c.QueryParam("search")

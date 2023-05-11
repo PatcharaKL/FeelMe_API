@@ -20,6 +20,7 @@ const (
 	UpdateUserData              = "UPDATE accounts SET  hp = ? WHERE account_id = ?"
 	createdHappinessPoint       = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
 	createdLogTimeStamp         = "INSERT INTO feelme_db.log_timestamps (username,timestamp_type,user_id,time) VALUES (?, ?, ?, ?) RETURNING id;"
+	UpdateProfileImage          = "UPDATE accounts SET avatar_url = ? WHERE account_id = ?"
 )
 
 type HapPointRequest struct {
