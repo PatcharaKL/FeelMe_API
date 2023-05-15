@@ -48,3 +48,35 @@ def fuzzy_cal(self_hp, work_hp, co_worker_hp):
     print(scoring.output['score'])
 
     return round(scoring.output['score'])
+
+def fuzzy_cal_self_happiness(self_hp):
+    self_happiness = ctrl.Antecedent(np.arange(0, 101, 1), 'self-happiness')
+    # output
+    score = ctrl.Consequent(np.arange(0, 101, 1), 'score')
+    # Auto-membership function population is possible with .automf(3, 5, or 7)
+    self_happiness['saddest'] = fuzz.trapmf(self_happiness.universe, [0, 0, 20, 50])
+    self_happiness['normal'] = fuzz.trimf(self_happiness.universe, [20, 50, 80])
+    self_happiness['happiest'] = fuzz.trapmf(self_happiness.universe, [50, 90, 100, 100])
+    # Custom membership functions can be built interactively with a familiar,
+    # Pythonic API
+    score['low'] = fuzz.trapmf(score.universe, [0, 0, 20, 50])
+    score['medium'] = fuzz.trimf(score.universe, [20, 50, 80])
+    score['high'] = fuzz.trapmf(score.universe, [50, 90, 100, 100])
+     # Rules
+    rule1 = ctrl.Rule(self_happiness['saddest'], score['low'])
+    rule2 = ctrl.Rule(self_happiness['normal'], score['medium'])
+    rule3 = ctrl.Rule(self_happiness['happiest'], score['high'])
+
+    scoring_ctrl = ctrl.ControlSystem([rule1, rule2, rule3])
+
+    scoring = ctrl.ControlSystemSimulation(scoring_ctrl)
+    # Pass inputs to the ControlSystem using Antecedent labels with Pythonic API
+    # Note: if you like passing many inputs all at once, use .inputs(dict_of_data)
+    scoring.input['self-happiness'] = self_hp
+     # Crunch the numbers
+    scoring.compute()
+
+    print(scoring.output['score'])
+
+    return round(scoring.output['score'])
+ 
