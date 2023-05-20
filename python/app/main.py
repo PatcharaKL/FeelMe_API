@@ -2,15 +2,16 @@
 
 from typing import Union
 from pydantic import BaseModel
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from .fuzzy import fuzzy_cal
-from .fuzzy import fuzzy_cal_self_happiness
+from .fuzzy import fuzzy_cal_points
 
 class Happiness_Points(BaseModel):
     self_hp: int
     work_hp: int
     co_worker_hp: int
-
+class Self_Hp_Data(BaseModel):
+    self_hps: list = []
 app = FastAPI()
 
 
@@ -26,7 +27,10 @@ def read_health_check():
 def test_fuzzy(self_hp: int, work_hp: int, co_worker_hp: int):
     result = fuzzy_cal(self_hp, work_hp, co_worker_hp)
     return {"value": result}
-@app.get("/v1/fuzzy/self_hp")
-def test_fuzzy(self_hp: int):
-    result = fuzzy_cal_self_happiness(self_hp)
+@app.post("/v1/fuzzy/self_hp")
+def cal_fuzzy_self_hp(self_hps:Self_Hp_Data):
+    data = self_hps.self_hps  # Read the JSON data from the request body
+    if len(data)==0:
+         raise HTTPException(status_code=400)
+    result = fuzzy_cal_points(data)
     return {"value": result}

@@ -1,6 +1,7 @@
 package users
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,6 +9,8 @@ import (
 	"time"
 
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
@@ -57,8 +60,11 @@ type ResponseGetHappines struct {
 type Value struct {
 	Value float64 `json:"value"`
 }
+type SP struct {
+	SelfPoints []int `json:"self_hps"`
+}
 
-func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, error) {
+func FuzzyCalculatorAll(self_points int, work_points int, co_points int) (*Value, error) {
 	http_name := HTTP + fmt.Sprintf("v1/fuzzy?self_hp=%d&work_hp=%d&co_worker_hp=%d", self_points, work_points, co_points)
 	vauel := new(Value)
 	req, err := http.Get(http_name)
@@ -67,6 +73,48 @@ func FuzzyCalculator(self_points int, work_points int, co_points int) (*Value, e
 	}
 	json.NewDecoder(req.Body).Decode(vauel)
 	return vauel, nil
+}
+func FuzzyCalculatorSelf(self_points []int) (*Value, error) {
+	http_name := "http://127.0.0.1:8000/v1/fuzzy/self_hp"
+	vauel := new(Value)
+	// Convert data to JSON
+	data := SP{
+		SelfPoints: self_points,
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return nil, err
+	}
+	req, err := http.Post(http_name, "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	json.NewDecoder(req.Body).Decode(vauel)
+
+	return vauel, nil
+}
+func (h *Handler) GetSelfPointFuzzy(c echo.Context) error {
+	user, _ := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*tokens.JwtCustomClaims)
+	userId := claims.AccountId
+	rows, err := h.DB.Query(getSeifPointByUserId, userId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	var self_point []int
+	for rows.Next() {
+		point := 0
+		if err := rows.Scan(&point); err != nil {
+			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+		}
+		self_point = append(self_point, point)
+	}
+	data, err := FuzzyCalculatorSelf(self_point)
+	if err != nil {
+		return c.JSON(http.StatusOK, Err{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, data)
 }
 
 func CheckHTTP() {
@@ -107,7 +155,7 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
-			fuzzy, errf := FuzzyCalculator(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
+			fuzzy, errf := FuzzyCalculatorAll(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
 			if errf != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
@@ -130,7 +178,7 @@ func (h *Handler) GetHappinessByUserId(c echo.Context) error {
 				&happiness.Workpoints, &happiness.Copoints, &happiness.TimeStamp); err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
-			fuzzy, errf := FuzzyCalculator(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
+			fuzzy, errf := FuzzyCalculatorAll(happiness.Selfpoints, happiness.Workpoints, happiness.Copoints)
 			if errf != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
