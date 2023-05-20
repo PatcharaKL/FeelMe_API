@@ -10,8 +10,6 @@ class Happiness_Points(BaseModel):
     self_hp: int
     work_hp: int
     co_worker_hp: int
-class Self_Hp_Data(BaseModel):
-    self_hps: list = []
 app = FastAPI()
 
 
@@ -28,8 +26,8 @@ def test_fuzzy(self_hp: int, work_hp: int, co_worker_hp: int):
     result = fuzzy_cal(self_hp, work_hp, co_worker_hp)
     return {"value": result}
 @app.post("/v1/fuzzy/self_hp")
-def cal_fuzzy_self_hp(self_hps:Self_Hp_Data):
-    data = self_hps.self_hps  # Read the JSON data from the request body
+def cal_fuzzy_self_hp(point: int):
+    data = point.points  # Read the JSON data from the request body
     if len(data)==0:
          raise HTTPException(status_code=400)
     result = fuzzy_cal_points(data)
