@@ -25,10 +25,7 @@ def read_health_check():
 def test_fuzzy(self_hp: int, work_hp: int, co_worker_hp: int):
     result = fuzzy_cal(self_hp, work_hp, co_worker_hp)
     return {"value": result}
-@app.post("/v1/fuzzy/self_hp")
+@app.get("/v1/fuzzy/cal/")
 def cal_fuzzy_self_hp(point: int):
-    data = point.points  # Read the JSON data from the request body
-    if len(data)==0:
-         raise HTTPException(status_code=400)
-    result = fuzzy_cal_points(data)
+    result = fuzzy_cal_points(point)
     return {"value": result}

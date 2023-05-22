@@ -49,7 +49,7 @@ def fuzzy_cal(self_hp, work_hp, co_worker_hp):
 
     return round(scoring.output['score'])
 
-def fuzzy_cal_points(value):
+def fuzzy_cal_points(point):
     points = ctrl.Antecedent(np.arange(0, 101, 1), 'point')
     # output
     score = ctrl.Consequent(np.arange(0, 101, 1), 'score')
@@ -73,7 +73,7 @@ def fuzzy_cal_points(value):
     # Pass inputs to the ControlSystem using Antecedent labels with Pythonic API
     # Note: if you like passing many inputs all at once, use .inputs(dict_of_data)
     
-    scoring.input['point'] = value
+    scoring.input['point'] = point
      # Crunch the numbers
     scoring.compute()
 

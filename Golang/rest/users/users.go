@@ -20,8 +20,11 @@ const (
 	updateStatusRefreshToken    = "UPDATE refresh_token SET  isValid = ? WHERE refreshToken = ?"
 	UpdateUserData              = "UPDATE accounts SET  hp = ? WHERE account_id = ?"
 	createdHappinessPoint       = "INSERT INTO deily_happiness_points (account_id,seif_point,work_point,co_worker_point,timestamp) VALUES (?, ?, ?, ?,?)RETURNING id;"
+	createFuzzyValue            = "INSERT INTO fuzzy_values (fuzzy_self_points,fuzzy_work_points,fuzzy_co_worker_points,value_over_all,timestamp,account_id) VALUES(?,?,?,?,?,?)RETURNING id;"
 	createdLogTimeStamp         = "INSERT INTO feelme_db.log_timestamps (username,timestamp_type,user_id,time) VALUES (?, ?, ?, ?) RETURNING id;"
 	UpdateProfileImage          = "UPDATE accounts SET avatar_url = ? WHERE account_id = ?"
+	getHappinessScoreByDate     = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp <= ? && timestamp >= ? ;"
+	getHappinessScoreAll        = "SELECT * FROM fuzzy_values"
 )
 
 type HapPointRequest struct {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/url"
-	"os"
 	"strings"
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
@@ -13,13 +12,18 @@ import (
 	"github.com/joho/godotenv"
 )
 
+const (
+	aCCOUNT_BOLB_NAME = "feelme"
+	aCCOUNT_BOLB_KEY  = "YInTKgO30iWulle6Q5GvUCBJnZG7A+H9MNHp22PmvaWZozjff9J3o86OT01+d9AezbqpIyC8Gw32+AStPonhyg=="
+)
+
 func UploadService(dirName, fileName string, file multipart.File) (string, error) {
 	err := godotenv.Load(".env")
 	if err != nil {
 		return err.Error(), err
 	}
-	accountName := os.Getenv("ACCOUNT_BOLB_NAME")
-	accountKey := os.Getenv("ACCOUNT_BOLB_KEY")
+	accountName := aCCOUNT_BOLB_NAME
+	accountKey := aCCOUNT_BOLB_KEY
 	arr := strings.Split(fileName, ".")
 	newFileName := uuid.New().String() + "." + arr[len(arr)-1]
 

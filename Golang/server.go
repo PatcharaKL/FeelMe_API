@@ -47,14 +47,14 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	e.POST("/login", h.UserLoginHandler)
 	e.POST("/logout", h.UserLogOutHandler)
 	e.GET("/health-check", h.HealthCheckHandler)
-	e.GET("/test/v1", h.GetSelfPointFuzzy)
+	e.GET("/happiness-score", h.GetHappinessScoreAverage)
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(tokens.JwtCustomClaims)
 		},
 		SigningKey: []byte(tokens.Signingkey),
 	}
-	e.Use(echojwt.WithConfig(config))
+
 	r.Use(echojwt.WithConfig(config))
 
 	r.GET("/employees/", h.GetAllUserHandler)
