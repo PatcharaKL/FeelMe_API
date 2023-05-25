@@ -30,7 +30,8 @@ const (
 	getHappinessScoreByDateAndAccountId = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp >= ? && timestamp <= ? && account_id = ? ; "
 	getHappinessScoreAll                = "SELECT * FROM fuzzy_values"
 	getHappinessScoreAllByAccountId     = "SELECT * FROM fuzzy_values WHERE account_id = ?;"
-	getHappinessScorePosition           = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.position_id,positions.position_name FROM feelme_db.fuzzy_values  JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.positions ON feelme_db.accounts.position_id = feelme_db.positions.position_id ORDER BY position_id asc;"
+	getHappinessScorePosition           = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.position_id,positions.position_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.positions ON feelme_db.accounts.position_id = feelme_db.positions.position_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id WHERE departments.department_id = ? ORDER BY position_id asc;"
+	getHappinessScoreDepartment         = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.department_id,departments.department_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id ORDER BY department_id asc;"
 )
 
 type HapPointRequest struct {
