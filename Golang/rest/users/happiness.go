@@ -605,7 +605,6 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 	case "week":
 		{
 			dayName := ""
-			countRow := 0
 			if accountId != "" {
 				rows, err := h.DB.Query(getHappinessScoreAllByAccountId, accountId)
 				if err != nil {
@@ -633,11 +632,8 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 						value_over_all += fuzzy.ValueOverAll
 						srtDate[1] = res1[0]
 						count++
-						countRow++
-
 					}
-					if dayName != day.String() {
-						countRow = 0
+					if dayName != day.String() && dayName != "Friday" {
 						dayName = day.String()
 						fuzzy_self_points += fuzzy.SelfPoints
 						fuzzy_work_points += fuzzy.WorkPoints
@@ -645,15 +641,9 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 						value_over_all += fuzzy.ValueOverAll
 						srtDate[1] = res1[0]
 						count++
-						countRow++
-
 					}
-					if dayName == "Friday" && countRow == 301 {
+					if dayName == "Friday" {
 						srtDate[1] = res1[0]
-						log.Print("==========================")
-						log.Print(srtDate[0] + " - " + srtDate[1])
-						log.Print(count)
-						log.Print("==========================")
 						data1 := new(FuzzyAverage)
 						data2 := new(FuzzyAverage)
 						data3 := new(FuzzyAverage)
@@ -675,18 +665,16 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 						fuzzy_co_worker_points = 0
 						value_over_all = 0
 						count = 0
-						countRow = 0
 						dayName = ""
 						srtDate[0] = ""
-						continue
 					}
+
 				}
 				return c.JSON(http.StatusOK, echo.Map{
 					"fuzzy_self_points_average":      fuzzy_self_points_average,
 					"fuzzy_work_points_average":      fuzzy_work_points_average,
 					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
 					"value_over_all_average":         value_over_all_average,
-					"Count":                          count,
 				})
 			}
 			rows, err := h.DB.Query(getHappinessScoreAll)
@@ -715,11 +703,8 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					value_over_all += fuzzy.ValueOverAll
 					srtDate[1] = res1[0]
 					count++
-					countRow++
-
 				}
 				if dayName != day.String() {
-					countRow = 0
 					dayName = day.String()
 					fuzzy_self_points += fuzzy.SelfPoints
 					fuzzy_work_points += fuzzy.WorkPoints
@@ -727,15 +712,9 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					value_over_all += fuzzy.ValueOverAll
 					srtDate[1] = res1[0]
 					count++
-					countRow++
-
 				}
-				if dayName == "Friday" && countRow == 301 {
+				if dayName == "Friday" && fuzzy.AccountId == 300 {
 					srtDate[1] = res1[0]
-					log.Print("==========================")
-					log.Print(srtDate[0] + " - " + srtDate[1])
-					log.Print(count)
-					log.Print("==========================")
 					data1 := new(FuzzyAverage)
 					data2 := new(FuzzyAverage)
 					data3 := new(FuzzyAverage)
@@ -757,18 +736,16 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					fuzzy_co_worker_points = 0
 					value_over_all = 0
 					count = 0
-					countRow = 0
 					dayName = ""
 					srtDate[0] = ""
-					continue
 				}
+
 			}
 			return c.JSON(http.StatusOK, echo.Map{
 				"fuzzy_self_points_average":      fuzzy_self_points_average,
 				"fuzzy_work_points_average":      fuzzy_work_points_average,
 				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
 				"value_over_all_average":         value_over_all_average,
-				"Count":                          count,
 			})
 		}
 	case "month":
