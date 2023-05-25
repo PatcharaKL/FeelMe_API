@@ -63,6 +63,13 @@ func (h *Handler) CheckOut(c echo.Context) error {
 	if err := h.DB.QueryRow(createdLogTimeStamp, fullName, 2, claims.AccountId, times).Scan(&lgTime.Id); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
+	stmt, err := h.DB.Prepare(UpdateUserData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	if _, err := stmt.Exec(100, claims.AccountId); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
 	hpyPoint := models.HappinessPoint{}
 	if err := h.DB.QueryRow(createdHappinessPoint, claims.AccountId, hpyPointBody.Selfpoints, hpyPointBody.Workpoints, hpyPointBody.Copoints, time.Now()).Scan(&hpyPoint.Id); err != nil {
 
