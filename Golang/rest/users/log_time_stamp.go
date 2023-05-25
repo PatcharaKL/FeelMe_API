@@ -41,6 +41,7 @@ func (h *Handler) CheckIn(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{"status": true, "message": "Success", "Time": times})
 }
 func (h *Handler) CheckOut(c echo.Context) error {
+	CheckHTTP()
 	user, _ := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*tokens.JwtCustomClaims)
 	hpyPointBody := new(HapPointRequest)
@@ -71,8 +72,27 @@ func (h *Handler) CheckOut(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 	hpyPoint := models.HappinessPoint{}
-	if err := h.DB.QueryRow(createdHappinessPoint, claims.AccountId, hpyPointBody.Selfpoints, hpyPointBody.Workpoints, hpyPointBody.Copoints, time.Now()).Scan(&hpyPoint.Id); err != nil {
-
+	if err := h.DB.QueryRow(createdHappinessPoint, claims.AccountId, hpyPointBody.Selfpoints, hpyPointBody.Workpoints, hpyPointBody.Copoints, times).Scan(&hpyPoint.Id); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	value_over_all, err := FuzzyCalculatorAll(hpyPointBody.Selfpoints, hpyPointBody.Workpoints, hpyPointBody.Copoints)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	fuzzy_self_points, err := FuzzyCalculator(hpyPointBody.Selfpoints)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	fuzzy_work_points, err := FuzzyCalculator(hpyPointBody.Workpoints)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	co_worker_points, err := FuzzyCalculator(hpyPointBody.Copoints)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	id := 0
+	if err := h.DB.QueryRow(createFuzzyValue, fuzzy_self_points.Value, fuzzy_work_points.Value, co_worker_points.Value, value_over_all.Value, times, claims.AccountId).Scan(&id); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
 	return c.JSON(http.StatusOK, echo.Map{"status": true, "message": "Success", "Time": times})
