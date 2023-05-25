@@ -48,6 +48,8 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	e.POST("/logout", h.UserLogOutHandler)
 	e.GET("/health-check", h.HealthCheckHandler)
 	e.GET("/happiness-score", h.GetHappinessScoreAverage)
+	e.GET("/happiness-score-all-time", h.GetHappinessScoreAllTimeAverage)
+	e.GET("/happiness-score-position", h.GetHappinessScorePositionAllTime)
 	config := echojwt.Config{
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(tokens.JwtCustomClaims)
