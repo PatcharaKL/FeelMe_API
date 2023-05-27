@@ -9,7 +9,6 @@ import (
 
 	"github.com/Azure/azure-storage-blob-go/azblob"
 	"github.com/google/uuid"
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -18,10 +17,6 @@ const (
 )
 
 func UploadService(dirName, fileName string, file multipart.File) (string, error) {
-	err := godotenv.Load(".env")
-	if err != nil {
-		return err.Error(), err
-	}
 	accountName := aCCOUNT_BOLB_NAME
 	accountKey := aCCOUNT_BOLB_KEY
 	arr := strings.Split(fileName, ".")
