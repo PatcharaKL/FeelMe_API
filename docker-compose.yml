@@ -9,11 +9,13 @@ services:
       - 80:80
     restart: unless-stopped
     depends_on:
-      - golang-api
+      - feelme-api
+      - feelme-web
+      - fuzzy-api
     networks:
       - nginx-network
 
-  golang-api:
+  feelme-api:
     build:
       context: ./Golang
       dockerfile: ./Dockerfile
@@ -32,6 +34,16 @@ services:
     expose:
         - 8000
     restart: unless-stopped
+    networks:
+      - nginx-network
+
+  feelme-web:
+    build:
+      context: './web'
+      dockerfile: dockerfile
+    container_name: feelme-web
+    expose: 
+      - 1000
     networks:
       - nginx-network
 
