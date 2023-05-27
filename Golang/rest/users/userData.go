@@ -27,40 +27,15 @@ type EditProfile struct {
 }
 
 func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
-	// edit_name := new(EditProfile)
+
 	user, _ := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*tokens.JwtCustomClaims)
-	name := c.FormValue("name")
-	surname := c.FormValue("surname")
-	file, _ := c.FormFile("file")
-	if name == "" && surname == "" {
-		return c.JSON(http.StatusBadRequest, "")
-	}
-	if file == nil {
-		if name != "" {
-			stmt, err := h.DB.Prepare(UpdateProfileName)
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-			if _, err := stmt.Exec(name, claims.AccountId); err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-		}
-		if surname != "" {
-			stmt, err := h.DB.Prepare(UpdateProfileSurName)
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-			if _, err := stmt.Exec(surname, claims.AccountId); err != nil {
-				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-			}
-		}
 
-		return c.JSON(http.StatusOK, echo.Map{
-			"Status":  true,
-			"Message": "Success",
-		})
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
+	// Open the file
 	src, err := file.Open()
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
@@ -79,18 +54,10 @@ func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
 	if _, err := stmt.Exec(uploadFile, claims.AccountId); err != nil {
 		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 	}
-	stmt, err = h.DB.Prepare(UpdateProfileName)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
-	if _, err := stmt.Exec(name, surname, claims.AccountId); err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"Status":    true,
 		"Message":   "Success",
 		"AccountID": claims.AccountId,
-		"Body":      name + " " + surname,
 	})
 }
 func (h *Handler) GetAllUserHandler(c echo.Context) error {
