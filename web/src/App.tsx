@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FeelMe from "./pages/FeelMe";
 import { LoginPage } from "./pages/Login";
 import { useAppDispatch, useAppSelector } from "./app/hooks";
@@ -11,9 +11,11 @@ function App() {
   const dispatch = useAppDispatch();
   const accessToken = localStorage.getItem("accessToken");
   const refreshToken = localStorage.getItem("refreshToken");
+  localStorage.setItem("sideBarSelectedID", "1");
   if (accessToken && refreshToken) {
     dispatch(login({ accessToken, refreshToken }));
-    dispatch(setSelectedItem(Number(localStorage.getItem("sideBarSelectedID"))));
+    const selectedItemLocal = localStorage.getItem("sideBarSelectedID")
+    dispatch(setSelectedItem(Number(selectedItemLocal || 1)));
     dispatch(setID(Number(localStorage.getItem('userID'))))
   }
   const Display = () => {
