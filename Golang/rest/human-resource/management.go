@@ -88,6 +88,9 @@ func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
 		})
 	}
 	accountId := c.QueryParam("account_id")
+	if accountId == "" {
+		return c.String(http.StatusBadRequest, "")
+	}
 	file, err := c.FormFile("file")
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
