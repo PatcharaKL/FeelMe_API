@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
+	"github.com/PatcharaKL/FeelMe_API/service"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -75,6 +76,45 @@ func (h *Handler) EditProfileEmployee(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"Status":  true,
 		"Message": "Succeed",
+	})
+}
+func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
+	user, _ := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*tokens.JwtCustomClaims)
+	if claims.AccountId != 4 {
+		return c.JSON(http.StatusUnauthorized, echo.Map{
+			"Status":  false,
+			"Message": "You Not HR",
+		})
+	}
+	accountId := c.QueryParam("account_id")
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	// Open the file
+	src, err := file.Open()
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+	defer src.Close()
+
+	fileName := file.Filename
+	uploadFile, uploadErr := service.UploadService("feelme-image/profile", fileName, src)
+	if uploadErr != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: uploadErr.Error()})
+	}
+	stmt, err := h.DB.Prepare(UpdateProfileImage)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	if _, err := stmt.Exec(uploadFile, accountId); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	return c.JSON(http.StatusOK, echo.Map{
+		"Status":    true,
+		"Message":   "Success",
+		"AccountID": accountId,
 	})
 }
 
