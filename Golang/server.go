@@ -10,6 +10,7 @@ import (
 
 	action "github.com/PatcharaKL/FeelMe_API/rest/Actions"
 	models "github.com/PatcharaKL/FeelMe_API/rest/Models"
+	hr "github.com/PatcharaKL/FeelMe_API/rest/human-resource"
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
 	"github.com/PatcharaKL/FeelMe_API/rest/users"
 	"github.com/golang-jwt/jwt/v4"
@@ -30,6 +31,18 @@ func middlewareHandler(e *echo.Echo) {
 }
 func endpointTokenHandler(e *echo.Echo, h *tokens.Handler) {
 	e.POST("/newtoken", h.NewTokenHandler)
+}
+func endpointHrHandler(e *echo.Echo, h *hr.Handler) {
+	hrs := e.Group("/hr")
+	config := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(tokens.JwtCustomClaims)
+		},
+		SigningKey: []byte(tokens.Signingkey),
+	}
+	hrs.Use(echojwt.WithConfig(config))
+	// hrs.GET("/health-check", h.EditProfileEmployee)
+	hrs.GET("/logtimestamp", h.GetCheckInAndOut)
 }
 func endpointActionHandler(e *echo.Echo, h *action.Handler) {
 	r := e.Group("/users")
@@ -79,6 +92,7 @@ func main() {
 	endpointUserHandler(e, users.NewApplication(db))
 	endpointTokenHandler(e, tokens.NewApplication(db))
 	endpointActionHandler(e, action.NewApplication(db))
+	endpointHrHandler(e, hr.NewApplication(db))
 
 	go func() {
 		if err := e.Start(":5000"); err != nil && err != http.ErrServerClosed {
