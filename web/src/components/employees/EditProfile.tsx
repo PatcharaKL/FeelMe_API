@@ -65,7 +65,7 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
       userBody.position_id &&
       userBody.department_id &&
       userBody.surname
-    )
+    ) {
       updateUserData({
         account_id: editVisible.selectedID,
         name: userBody.name,
@@ -76,11 +76,12 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
         .unwrap()
         .then((res) => console.log(res))
         .catch((e) => console.log(e));
-    setEditVisible({
-      boardShow: false,
-      selectedID: 0,
-      status: true,
-    })
+      setEditVisible({
+        boardShow: false,
+        selectedID: 0,
+        status: true,
+      });
+    }
   };
 
   const departmentOptions = [
@@ -96,6 +97,7 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
     { value: "4", label: "Human Resource" },
   ];
   const defaultPositionOption = positionOptions[userBody.position_id - 1];
+
   return (
     <>
       <div className=" fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm">
@@ -123,7 +125,7 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
                 <img
                   src={user.avatar_url}
                   alt="user profile picture"
-                  className="m-auto w-56 rounded-full ring-8 ring-gray-300"
+                  className="m-auto h-56 w-56 rounded-full object-cover ring-8 ring-gray-300"
                 />
               </div>
               <input
@@ -163,6 +165,9 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
                 className="col-span-2"
                 options={positionOptions}
                 value={defaultPositionOption}
+                onChange={(id) =>
+                  setUserBody((prev) => ({ ...prev, position_id: id.value }))
+                }
               />
               <div className="col-span-2 flex">
                 <button

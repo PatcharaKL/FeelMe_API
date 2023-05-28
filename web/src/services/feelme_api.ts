@@ -109,9 +109,8 @@ export const feelmeAPI = createApi({
       query: (data) => {
         const formData = new FormData();
         formData.append("file", data.file);
-        formData.append("account_id", data.id);
         return {
-          url: `/hr/edit/profile-image`,
+          url: `/hr/edit/profile-image?account_id=${data.id}`,
           method: "POST",
           body: formData,
         };

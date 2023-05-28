@@ -6,7 +6,7 @@ import CustomPagination from "./CustomPagination";
 import EmployeeDashboard from "../dashboard/EmployeeDashboard";
 import { HealthBar } from "./HealthBar";
 import EditProfile from "./EditProfile";
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from "@mui/icons-material/Edit";
 
 interface Employees {
   account_id: number;
@@ -18,6 +18,7 @@ interface Employees {
   setDashboardVisible: any;
   editVisible: any;
   setEditVisible: any;
+  department_name: string;
 }
 
 export const Employees = () => {
@@ -29,6 +30,19 @@ export const Employees = () => {
     error,
   } = useGetEmployeesQuery({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const searchFunc = (userData: any) => {
+    if (
+      userData?.name.toLowerCase().includes(search.toLowerCase()) ||
+      userData?.surname.toLowerCase().includes(search.toLowerCase())
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const empList = employees?.filter(searchFunc).sort((a: any, b: any) => a.account_id - b.account_id)
   const itemsPerPage = 8;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -44,9 +58,12 @@ export const Employees = () => {
   });
 
   return (
-    <div className="flex h-full flex-col gap-5">
+    <div className="grid h-full w-3/4 grid-cols-4 gap-2">
       {editVisible.boardShow && (
-        <EditProfile setEditVisible={setEditVisible} editVisible={editVisible}/>
+        <EditProfile
+          setEditVisible={setEditVisible}
+          editVisible={editVisible}
+        />
       )}
 
       {dashboardVisible.status && (
@@ -56,20 +73,22 @@ export const Employees = () => {
         />
       )}
 
-      {!isLoading && isSuccess && !isFetching && (
+      {!isLoading && isSuccess ? (
         <>
-          <Header setEditVisible={setEditVisible} editVisible={editVisible} />
-          <CustomPagination
-            itemsPerPage={itemsPerPage}
-            totalItems={employees.length}
-            paginate={paginate}
-          />
-        </>
-      )}
-      <div className="grid grid-cols-4 gap-5">
-        {!isLoading &&
-          isSuccess &&
-          employees
+          <div className="col-span-4 space-y-2">
+            <Header
+              search={search}
+              setSearch={setSearch}
+              setEditVisible={setEditVisible}
+              editVisible={editVisible}
+            />
+            <CustomPagination
+              itemsPerPage={itemsPerPage}
+              totalItems={empList.length}
+              paginate={paginate}
+            />
+          </div>
+          {empList
             .slice(indexOfFirstItem, indexOfLastItem)
             .map((employee: Employees) => (
               <EmployeesCard
@@ -79,13 +98,17 @@ export const Employees = () => {
                 surname={employee.surname}
                 avatar_url={employee.avatar_url}
                 position_name={employee.position_name}
+                department_name={employee.department_name}
                 hp={employee.hp}
                 setDashboardVisible={setDashboardVisible}
                 editVisible={editVisible}
                 setEditVisible={setEditVisible}
               />
             ))}
-      </div>
+        </>
+      ) : (
+        <div className="h-full w-full animate-pulse bg-slate-400"></div>
+      )}
     </div>
   );
 };
@@ -104,10 +127,12 @@ const Header = (props: any) => {
             type="text"
             className="w-full rounded-lg border border-violet-300 py-2 pl-9 pr-3 placeholder-violet-500 ring-violet-500 focus:outline-none focus:ring-1"
             placeholder="Search for employees.."
+            value={props.search}
+            onChange={(e) => props.setSearch(e.target.value)}
           ></input>
         </label>
         <button
-          className="flex justify-center items-center bg-violet-500 h-10 w-10 text-white rounded-lg hover:bg-violet-400"
+          className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500 text-white hover:bg-violet-400"
           onClick={() =>
             props.setEditVisible({
               selectedID: 0,
@@ -129,6 +154,7 @@ const EmployeesCard = ({
   surname: lastName,
   avatar_url,
   position_name,
+  department_name,
   setDashboardVisible,
   editVisible,
   setEditVisible,
@@ -144,7 +170,7 @@ const EmployeesCard = ({
               status: true,
             })
           }
-          className="absolute hover:bg-orange-300 top-0 right-0 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-400 text-white"
+          className="absolute top-0 right-0 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-400 text-white hover:bg-orange-300"
         >
           <EditIcon />
         </button>
@@ -178,7 +204,10 @@ const EmployeesCard = ({
             <p className="truncate text-xl font-bold">
               {name} {lastName}
             </p>
-            <p className="truncate">{position_name}</p>
+            <div className="flex justify-center space-x-3">
+              <p className="truncate font-medium">{department_name}</p>
+              <p className="truncate">{position_name}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -190,7 +219,7 @@ const CardImage = ({ avatarURL }: any) => {
   return (
     <>
       <img
-        className="h-48 w-48 rounded-full object-scale-down ring-4 ring-emerald-300"
+        className="h-48 w-48 rounded-full object-cover ring-4 ring-emerald-300"
         src={avatarURL}
       ></img>
     </>
