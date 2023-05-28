@@ -41,7 +41,7 @@ func endpointHrHandler(e *echo.Echo, h *hr.Handler) {
 		SigningKey: []byte(tokens.Signingkey),
 	}
 	hrs.Use(echojwt.WithConfig(config))
-	// hrs.GET("/health-check", h.EditProfileEmployee)
+	hrs.POST("/edit/user-profile", h.EditProfileEmployee)
 	hrs.GET("/logtimestamp", h.GetCheckInAndOut)
 }
 func endpointActionHandler(e *echo.Echo, h *action.Handler) {
