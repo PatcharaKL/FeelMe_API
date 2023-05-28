@@ -2,10 +2,12 @@ package humanresource
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/PatcharaKL/FeelMe_API/rest/tokens"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type EditUser struct {
@@ -26,8 +28,29 @@ type TimeStampData struct {
 	LogType  string `json:"logType"`
 	Time     string `json:"timestamp"`
 }
+type CreatedEmployee struct {
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	SurName      string `json:"surname"`
+	Password     string `json:"password"`
+	PositionId   int    `json:"position_id"`
+	DepartmentId int    `json:"department_id"`
+	CompanyId    int    `json:"company_id"`
+}
 
-const YYYYMMDD = "2006-01-02"
+func HashPassword(password []byte) (string, error) {
+	cost := 10
+	hashedPassword, err := bcrypt.GenerateFromPassword(password, cost)
+	if err != nil {
+		return "", nil
+	}
+	return string(hashedPassword), nil
+}
+
+const (
+	YYYYMMDD       = "2006-01-02"
+	DDMMYYYYhhmmss = "2006-01-02 15:04:05"
+)
 
 func (h *Handler) EditProfileEmployee(c echo.Context) error {
 	user, _ := c.Get("user").(*jwt.Token)
@@ -57,15 +80,33 @@ func (h *Handler) EditProfileEmployee(c echo.Context) error {
 
 func (h *Handler) CreatedUser(c echo.Context) error {
 	user, _ := c.Get("user").(*jwt.Token)
+	employee := new(CreatedEmployee)
 	claims := user.Claims.(*tokens.JwtCustomClaims)
+	location := time.FixedZone("UTC+7", 7*60*60)
+
+	times := time.Now().In(location).Format(DDMMYYYYhhmmss)
 	if claims.Role != 4 {
 		return c.JSON(http.StatusUnauthorized, echo.Map{
 			"Status":  false,
 			"Message": "You Not HR",
 		})
 	}
+	if err := c.Bind(employee); err != nil {
+		return c.JSON(http.StatusBadRequest, Err{Message: err.Error()})
+	}
+	password := []byte(employee.Password)
+	hashedPassword, err := HashPassword(password)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
+	id := 0
+	if err := h.DB.QueryRow(createdEmployee, employee.Email, hashedPassword, employee.Name, employee.SurName,
+		"https://cdn-icons-png.flaticon.com/512/236/236831.png", times, true, 100, 1, times,
+		employee.DepartmentId, employee.PositionId, employee.CompanyId).Scan(&id); err != nil {
+		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+	}
 	return c.JSON(http.StatusOK, echo.Map{
 		"Status":  true,
-		"Message": "Hello HR",
+		"Message": "Succeed",
 	})
 }
