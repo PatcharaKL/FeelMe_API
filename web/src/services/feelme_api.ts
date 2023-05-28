@@ -42,8 +42,6 @@ const baseQueryWithReAuth: BaseQueryFn<
           refreshToken: refreshResult.data.refreshToken,
         })
       );
-      // store token in local storage
-      // retry the initial query
       result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logout());
@@ -55,6 +53,7 @@ const baseQueryWithReAuth: BaseQueryFn<
 // Define a service using a base URL and expected endpoints
 export const feelmeAPI = createApi({
   reducerPath: "feelmeAPI",
+  tagTypes: ["User"],
   baseQuery: baseQueryWithReAuth,
   endpoints: (builder) => ({
     getHealthCheck: builder.query({
@@ -68,6 +67,7 @@ export const feelmeAPI = createApi({
     }),
     getEmployees: builder.query({
       query: () => `/users/employees/`,
+      providesTags: ["User"],
     }),
     login: builder.mutation({
       query: (credential) => ({
@@ -84,6 +84,7 @@ export const feelmeAPI = createApi({
     }),
     getEmployee: builder.query({
       query: (id) => `/users/employees/?accountId=${id}`,
+      providesTags: ["User"],
     }),
     refreshToken: builder.mutation({
       query: (refreshToken) => ({
@@ -104,6 +105,18 @@ export const feelmeAPI = createApi({
         method: "GET",
       }),
     }),
+    uploadImage: builder.mutation({
+      query: (file) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        return {
+          url: `/users/edit/profile-image`,
+          method: "POST",
+          body: formData,
+        };
+      },
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -118,4 +131,5 @@ export const {
   useGetEmployeeQuery,
   useGetOverallHappinessScoreQuery,
   useGetDepartmentProportionQuery,
+  useUploadImageMutation,
 } = feelmeAPI;

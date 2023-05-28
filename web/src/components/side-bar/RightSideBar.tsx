@@ -21,7 +21,7 @@ const avatar = () => {
   const AvatarImage = () => {
     return (
       <img
-        className="rounded-full"
+        className="rounded-full object-cover w-full h-full"
         src={user.avatar_url}
         alt="user avatar"
       />

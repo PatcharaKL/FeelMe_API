@@ -1,16 +1,35 @@
 import { useEffect, useState } from "react";
 import { icons } from "../../assets/icons";
-import { useGetEmployeeQuery } from "../../services/feelme_api";
+import {
+  useGetEmployeeQuery,
+  useUploadImageMutation,
+} from "../../services/feelme_api";
 import Dropdown from "react-dropdown";
 import "react-dropdown/style.css";
 
 const CloseIcon = icons.close;
 const EditProfile = ({ editVisible, setEditVisible }: any) => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const handleFileChange = (event:any) => {
-        const file = event.target.files[0];
-        setSelectedFile(file);
-      };
+  const [uploadFile, { isLoading: uploading, isError, error }] =
+    useUploadImageMutation();
+  //   const handleFileChange = (event: any) => {
+  //     const file = event.target.files[0];
+  //     setSelectedFile(file);
+  //   };
+  //   const [selectedFile, setSelectedFile] = useState(null);
+  const handleUpload = (event: any) => {
+    if (event.target.files[0]) {
+      uploadFile(event.target.files[0])
+        .unwrap()
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          alert("Failed to upload image");
+          console.error(error);
+        });
+    }
+  };
+
   const {
     data: user,
     isLoading,
@@ -49,12 +68,12 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
   ];
   const defaultDepartmentOption = departmentOptions[userBody.department_id - 1];
   const positionOptions = [
-      { value: "1", label: "Fullstack Developer" },
-      { value: "2", label: "Frontend Developer" },
-      { value: "3", label: "Backend Developer" },
-      { value: "4", label: "Human Resource" },
-    ];
-    const defaultPositionOption = positionOptions[userBody.position_id - 1];
+    { value: "1", label: "Fullstack Developer" },
+    { value: "2", label: "Frontend Developer" },
+    { value: "3", label: "Backend Developer" },
+    { value: "4", label: "Human Resource" },
+  ];
+  const defaultPositionOption = positionOptions[userBody.position_id - 1];
   return (
     <>
       <div className=" fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm">
@@ -89,7 +108,8 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
                 accept="image/*"
                 type="file"
                 alt="user profile picture"
-                className="col-span-2 bg-slate-200 self-center rounded-sm hover:bg-slate-300"
+                className="col-span-2 self-center rounded-sm bg-slate-200 hover:bg-slate-300"
+                onChange={handleUpload}
               />
               <input
                 className="h-10 rounded-md border border-gray-300 px-2"
@@ -123,7 +143,7 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
                 value={defaultPositionOption}
               />
               <div className="col-span-2 flex">
-                <button className="m-auto h-10 w-1/3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white">
+                <button className="m-auto h-10 w-1/3 rounded-lg bg-violet-600 text-white hover:bg-violet-700">
                   Done
                 </button>
               </div>
