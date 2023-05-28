@@ -81,7 +81,7 @@ func (h *Handler) EditProfileEmployee(c echo.Context) error {
 func (h *Handler) UpdateUserImageProfile(c echo.Context) error {
 	user, _ := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*tokens.JwtCustomClaims)
-	if claims.AccountId != 4 {
+	if claims.Role != 4 {
 		return c.JSON(http.StatusUnauthorized, echo.Map{
 			"Status":  false,
 			"Message": "You Not HR",
