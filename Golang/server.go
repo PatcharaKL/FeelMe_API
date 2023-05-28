@@ -44,6 +44,7 @@ func endpointHrHandler(e *echo.Echo, h *hr.Handler) {
 	hrs.POST("/edit/user-profile", h.EditProfileEmployee)
 	hrs.POST("/created-employee", h.CreatedUser)
 	hrs.GET("/logtimestamp", h.GetCheckInAndOut)
+	hrs.POST("/edit/profile-image", h.UpdateUserImageProfile)
 }
 func endpointActionHandler(e *echo.Echo, h *action.Handler) {
 	r := e.Group("/users")
@@ -79,7 +80,6 @@ func endpointUserHandler(e *echo.Echo, h *users.Handler) {
 	r.GET("/employees/:id/:period/happiness-points", h.GetHappinessByUserId)
 	r.POST("/check-in", h.CheckIn)
 	r.POST("/check-out", h.CheckOut)
-	r.POST("/edit/profile-image", h.UpdateUserImageProfile)
 
 }
 func main() {
