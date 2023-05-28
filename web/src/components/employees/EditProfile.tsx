@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { icons } from "../../assets/icons";
 import {
   useGetEmployeeQuery,
+  useUpdateUserDataMutation,
   useUploadImageMutation,
 } from "../../services/feelme_api";
 import Dropdown from "react-dropdown";
@@ -9,16 +10,12 @@ import "react-dropdown/style.css";
 
 const CloseIcon = icons.close;
 const EditProfile = ({ editVisible, setEditVisible }: any) => {
+  const [updateUserData, { isLoading: updating }] = useUpdateUserDataMutation();
   const [uploadFile, { isLoading: uploading, isError, error }] =
     useUploadImageMutation();
-  //   const handleFileChange = (event: any) => {
-  //     const file = event.target.files[0];
-  //     setSelectedFile(file);
-  //   };
-  //   const [selectedFile, setSelectedFile] = useState(null);
   const handleUpload = (event: any) => {
     if (event.target.files[0]) {
-      uploadFile(event.target.files[0])
+      uploadFile({ file: event.target.files[0], id: editVisible.selectedID })
         .unwrap()
         .then((response) => {
           console.log(response);
@@ -60,6 +57,31 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
       });
     }
   }, [user]);
+
+  const updateHandler = () => {
+    if (
+      userBody.account_id &&
+      userBody.name &&
+      userBody.position_id &&
+      userBody.department_id &&
+      userBody.surname
+    )
+      updateUserData({
+        account_id: editVisible.selectedID,
+        name: userBody.name,
+        surname: userBody.surname,
+        position_id: Number(userBody.position_id),
+        department_id: Number(userBody.department_id),
+      })
+        .unwrap()
+        .then((res) => console.log(res))
+        .catch((e) => console.log(e));
+    setEditVisible({
+      boardShow: false,
+      selectedID: 0,
+      status: true,
+    })
+  };
 
   const departmentOptions = [
     { value: "1", label: "CE" },
@@ -143,7 +165,10 @@ const EditProfile = ({ editVisible, setEditVisible }: any) => {
                 value={defaultPositionOption}
               />
               <div className="col-span-2 flex">
-                <button className="m-auto h-10 w-1/3 rounded-lg bg-violet-600 text-white hover:bg-violet-700">
+                <button
+                  onClick={updateHandler}
+                  className="m-auto h-10 w-1/3 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
+                >
                   Done
                 </button>
               </div>

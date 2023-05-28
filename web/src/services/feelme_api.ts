@@ -106,15 +106,24 @@ export const feelmeAPI = createApi({
       }),
     }),
     uploadImage: builder.mutation({
-      query: (file) => {
+      query: (data) => {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", data.file);
+        formData.append("account_id", data.id);
         return {
-          url: `/users/edit/profile-image`,
+          url: `/hr/edit/profile-image`,
           method: "POST",
           body: formData,
         };
       },
+      invalidatesTags: ["User"],
+    }),
+    updateUserData: builder.mutation({
+      query: (data) => ({
+        url: "/hr/edit/user-profile",
+        method: "POST",
+        body: data,
+      }),
       invalidatesTags: ["User"],
     }),
   }),
@@ -132,4 +141,5 @@ export const {
   useGetOverallHappinessScoreQuery,
   useGetDepartmentProportionQuery,
   useUploadImageMutation,
+  useUpdateUserDataMutation,
 } = feelmeAPI;

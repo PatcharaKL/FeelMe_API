@@ -6,6 +6,8 @@ import CustomPagination from "./CustomPagination";
 import EmployeeDashboard from "../dashboard/EmployeeDashboard";
 import { HealthBar } from "./HealthBar";
 import EditProfile from "./EditProfile";
+import EditIcon from '@mui/icons-material/Edit';
+
 interface Employees {
   account_id: number;
   hp: number;
@@ -105,7 +107,7 @@ const Header = (props: any) => {
           ></input>
         </label>
         <button
-          className=""
+          className="flex justify-center items-center bg-violet-500 h-10 w-10 text-white rounded-lg hover:bg-violet-400"
           onClick={() =>
             props.setEditVisible({
               selectedID: 0,
@@ -113,7 +115,7 @@ const Header = (props: any) => {
             })
           }
         >
-          EDIT
+          <EditIcon />
         </button>
       </div>
     </div>
@@ -142,9 +144,9 @@ const EmployeesCard = ({
               status: true,
             })
           }
-          className="absolute top-0 right-0 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-400 text-white"
+          className="absolute hover:bg-orange-300 top-0 right-0 flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-400 text-white"
         >
-          Edit
+          <EditIcon />
         </button>
       </>
     );
