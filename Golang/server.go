@@ -25,7 +25,7 @@ func middlewareHandler(e *echo.Echo) {
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{http.MethodGet, http.MethodHead, http.MethodPut, http.MethodPatch, http.MethodPost, http.MethodDelete, http.MethodOptions},
-	// }))
+	}))
 
 }
 func endpointTokenHandler(e *echo.Echo, h *tokens.Handler) {
