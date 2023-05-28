@@ -42,6 +42,7 @@ func endpointHrHandler(e *echo.Echo, h *hr.Handler) {
 	}
 	hrs.Use(echojwt.WithConfig(config))
 	hrs.POST("/edit/user-profile", h.EditProfileEmployee)
+	hrs.POST("/created-employee", h.CreatedUser)
 	hrs.GET("/logtimestamp", h.GetCheckInAndOut)
 }
 func endpointActionHandler(e *echo.Echo, h *action.Handler) {
