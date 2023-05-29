@@ -58,18 +58,26 @@ func (h *Handler) GetCheckInAndOut(c echo.Context) error {
 	result.Name = userName
 	if len(list_cl_in) != len(list_cl_out) {
 		count = len(list_cl_out)
+		for i := 0; i < len(list_cl_in); i++ {
+			if i < count {
+				record.ClockIn = list_cl_in[i]
+				record.ClockOut = list_cl_out[i]
+				result.Records = append(result.Records, *record)
+			}
+			if i >= count {
+				record.ClockIn = list_cl_in[i]
+				record.ClockOut = "-"
+				result.Records = append(result.Records, *record)
+			}
+		}
 	}
-	for i := 0; i < len(list_cl_in); i++ {
-		if i <= count {
+	if len(list_cl_in) == len(list_cl_out) {
+		for i := 0; i < len(list_cl_in); i++ {
 			record.ClockIn = list_cl_in[i]
 			record.ClockOut = list_cl_out[i]
 			result.Records = append(result.Records, *record)
-		} else {
-			record.ClockIn = list_cl_in[i]
-			result.Records = append(result.Records, *record)
 		}
 	}
-
 	return c.JSON(http.StatusOK, echo.Map{
 		"Data": result,
 	})
