@@ -32,7 +32,7 @@ const OverallScore = ({ employeeID = "" }: any) => {
   };
   return (
     <>
-      {!isLoading && (
+      {!isLoading && isSuccess && (
         <div className="flex justify-around gap-10">
           <div className="flex h-fit w-fit items-center justify-evenly  overflow-hidden rounded-2xl border border-violet-50 py-7 shadow-md shadow-violet-100">
             <MatrixScore label="Overall Score" hpScore={getScore().overall} />

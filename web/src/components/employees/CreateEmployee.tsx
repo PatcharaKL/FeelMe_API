@@ -27,7 +27,7 @@ const EditProfile = ({ setAddVisible }: any) => {
   });
 
   const createHandler = (e: any) => {
-    e.preventDefault()
+    e.preventDefault();
     if (
       userBody.email &&
       userBody.password &&
@@ -36,19 +36,24 @@ const EditProfile = ({ setAddVisible }: any) => {
       userBody.department_id &&
       userBody.surname
     ) {
-      createUser({
-        email: userBody.email,
-        password: userBody.password,
-        name: userBody.name,
-        surname: userBody.surname,
-        position_id: Number(userBody.position_id),
-        department_id: Number(userBody.department_id),
-        company_id: 1,
-      })
-        .unwrap()
-        .then((res) => console.log(res))
-        .catch((e) => console.log(e));
-      setAddVisible(false);
+      if (userBody.password == userBody.conPW) {
+        createUser({
+          email: userBody.email,
+          password: userBody.password,
+          name: userBody.name,
+          surname: userBody.surname,
+          position_id: Number(userBody.position_id),
+          department_id: Number(userBody.department_id),
+          company_id: 1,
+        })
+          .unwrap()
+          .then((res) => console.log(res))
+          .catch((e) => console.log(e));
+        setAddVisible(false);
+      }
+    } else {
+      alert("Password don't match");
+      setUserBody({ ...userBody, password: "", conPW: "" });
     }
   };
 
@@ -73,18 +78,16 @@ const EditProfile = ({ setAddVisible }: any) => {
           {/* Header */}
           <div className="flex items-center border-b-2 border-violet-100 bg-violet-600 px-14 py-3">
             <div className="text-2xl text-white">Register</div>
-            <button
-              className="ml-auto"
-              onClick={() =>
-                setAddVisible(false)
-              }
-            >
+            <button className="ml-auto" onClick={() => setAddVisible(false)}>
               <CloseIcon className="text-white" />
             </button>
           </div>
           {/* Content */}
           {!isLoading && (
-            <form onSubmit={e => createHandler(e)} className="grid h-full w-full grid-cols-2 justify-center space-x-1 space-y-4 bg-slate-50 p-6">
+            <form
+              onSubmit={(e) => createHandler(e)}
+              className="grid h-full w-full grid-cols-2 justify-center space-x-1 space-y-4 bg-slate-50 p-6"
+            >
               <input
                 className="col-span-2 h-10 rounded-md border border-gray-300 px-2"
                 value={userBody.email}

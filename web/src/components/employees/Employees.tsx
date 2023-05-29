@@ -62,7 +62,7 @@ export const Employees = () => {
   const [addVisible, setAddVisible] = useState(false);
 
   return (
-    <div className="grid h-full w-3/4 grid-cols-4 gap-2">
+    <div className="flex h-full w-5/6 flex-wrap gap-y-2">
       {addVisible && <CreateEmployee setAddVisible={setAddVisible} />}
       {editVisible.boardShow && (
         <EditProfile
@@ -80,7 +80,7 @@ export const Employees = () => {
 
       {!isLoading && isSuccess ? (
         <>
-          <div className="col-span-4 space-y-2">
+          <div className="flex-1 space-y-2">
             <Header
               search={search}
               setSearch={setSearch}
@@ -94,23 +94,27 @@ export const Employees = () => {
               paginate={paginate}
             />
           </div>
-          {empList
-            .slice(indexOfFirstItem, indexOfLastItem)
-            .map((employee: Employees) => (
-              <EmployeesCard
-                key={employee.account_id}
-                account_id={employee.account_id}
-                name={employee.name}
-                surname={employee.surname}
-                avatar_url={employee.avatar_url}
-                position_name={employee.position_name}
-                department_name={employee.department_name}
-                hp={employee.hp}
-                setDashboardVisible={setDashboardVisible}
-                editVisible={editVisible}
-                setEditVisible={setEditVisible}
-              />
-            ))}
+          <>
+            <div className="grid w-full sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 justify-items-center gap-6 grid-cols-4">
+              {empList
+                .slice(indexOfFirstItem, indexOfLastItem)
+                .map((employee: Employees) => (
+                  <EmployeesCard
+                    key={employee.account_id}
+                    account_id={employee.account_id}
+                    name={employee.name}
+                    surname={employee.surname}
+                    avatar_url={employee.avatar_url}
+                    position_name={employee.position_name}
+                    department_name={employee.department_name}
+                    hp={employee.hp}
+                    setDashboardVisible={setDashboardVisible}
+                    editVisible={editVisible}
+                    setEditVisible={setEditVisible}
+                  />
+                ))}
+            </div>
+          </>
         </>
       ) : (
         <div className=""></div>
@@ -151,7 +155,7 @@ const Header = (props: any) => {
           </button>
           <button
             className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600 text-white hover:bg-violet-400"
-            onClick={()=>props.setAddVisible(true)}
+            onClick={() => props.setAddVisible(true)}
           >
             <PersonAddIcon />
           </button>
@@ -213,6 +217,7 @@ const EmployeesCard = ({
         {hp <= 0 && <Overlay />}
         <div className="flex h-fit w-64 flex-col items-center gap-3 overflow-hidden rounded-lg bg-violet-50 px-4 py-8 text-center shadow-lg shadow-violet-100">
           <HealthBar hp={hp} />
+          <div>{editVisible.status}</div>
           <CardImage avatarURL={avatar_url}></CardImage>
           <div className="w-full">
             <p className="truncate text-xl font-bold">

@@ -47,32 +47,34 @@ const transformToChartData = (
   rawData: RawUserHappinessHistory
 ): UserHappinessHistory[] => {
   const transformedData: UserHappinessHistory[] = [];
+  console.log(rawData);
+  if (rawData) {
+    const {
+      fuzzy_self_points_average,
+      fuzzy_work_points_average,
+      fuzzy_co_worker_points_average,
+      value_over_all_average,
+    } = rawData;
 
-  const {
-    fuzzy_self_points_average,
-    fuzzy_work_points_average,
-    fuzzy_co_worker_points_average,
-    value_over_all_average,
-  } = rawData;
+    for (let i = 0; i < fuzzy_self_points_average.length; i++) {
+      const date = fuzzy_self_points_average[i].DateTime;
+      const selfPoints = fuzzy_self_points_average[i].Value;
+      const workPoints = fuzzy_work_points_average[i].Value;
+      const coWorkerPoints = fuzzy_co_worker_points_average[i].Value;
+      const overallScore = value_over_all_average[i].Value;
 
-  for (let i = 0; i < fuzzy_self_points_average.length; i++) {
-    const date = fuzzy_self_points_average[i].DateTime;
-    const selfPoints = fuzzy_self_points_average[i].Value;
-    const workPoints = fuzzy_work_points_average[i].Value;
-    const coWorkerPoints = fuzzy_co_worker_points_average[i].Value;
-    const overallScore = value_over_all_average[i].Value;
+      const transformedEntry: UserHappinessHistory = {
+        self_points: Number(selfPoints.toFixed(2)),
+        work_points: Number(workPoints.toFixed(2)),
+        co_worker_points: Number(coWorkerPoints.toFixed(2)),
+        overall_score: Number(overallScore.toFixed(2)),
+        date: date,
+      };
 
-    const transformedEntry: UserHappinessHistory = {
-      self_points: Number(selfPoints.toFixed(2)),
-      work_points: Number(workPoints.toFixed(2)),
-      co_worker_points: Number(coWorkerPoints.toFixed(2)),
-      overall_score: Number(overallScore.toFixed(2)),
-      date: date,
-    };
-
-    transformedData.push(transformedEntry);
+      transformedData.push(transformedEntry);
+    }
+    console.log(transformedData);
   }
-  console.log(transformedData);
   return transformedData;
 };
 
@@ -87,7 +89,7 @@ export const HappinessScoreTrend = ({ id = "" }: any) => {
       <div className="text-md font-light text-gray-500">
         happiness score trend from collected questionnaire every work day
       </div>
-      {isLoading ? (
+      {isLoading && !isSuccess ? (
         <div className="h-full w-full animate-pulse bg-gray-100">Loading..</div>
       ) : (
         <ResponsiveContainer width="100%" height="100%">
