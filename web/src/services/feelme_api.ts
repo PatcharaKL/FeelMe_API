@@ -105,6 +105,12 @@ export const feelmeAPI = createApi({
         method: "GET",
       }),
     }),
+    getClockingRecord: builder.query({
+      query: (id) => ({
+        url: `/hr/logtimestamp?account-id=${id}`,
+        method: "GET",
+      }),
+    }),
     uploadImage: builder.mutation({
       query: (data) => {
         const formData = new FormData();
@@ -150,4 +156,5 @@ export const {
   useUploadImageMutation,
   useUpdateUserDataMutation,
   useCreateUserMutation,
+  useGetClockingRecordQuery,
 } = feelmeAPI;

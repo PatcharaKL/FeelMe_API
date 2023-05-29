@@ -4,6 +4,7 @@ import OverallScore from "./OverallScore";
 import { HealthBar } from "../employees/HealthBar";
 import { HappinessScoreTrend } from "./HappinessScoreTrend";
 import { useGetEmployeeQuery } from "../../services/feelme_api";
+import Clocking from "./Clocking";
 
 const CloseIcon = icons.close;
 
@@ -14,7 +15,7 @@ const EmployeeDashboard = ({ employeeID, setDashboardVisible }: any) => {
     isSuccess,
   } = useGetEmployeeQuery(employeeID);
   return (
-    <div className=" fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm">
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm">
       {/* container */}
       <div className="flex h-5/6 w-4/5 flex-col overflow-hidden rounded-xl bg-white">
         {/* header */}
@@ -28,36 +29,36 @@ const EmployeeDashboard = ({ employeeID, setDashboardVisible }: any) => {
           </button>
         </div>
         {/* content */}
-        <div className="flex h-full w-full flex-col gap-14 px-14 py-8">
+        <div className="grid h-full w-full grid-cols-2 gap-14 px-14 py-8">
           {!isLoading && isSuccess ? (
-            <div className="flex justify-between gap-10">
+            <>
               {/* Information */}
-              <div className="flex flex-col gap-3">
-                <div>
+              <div className="grid grid-rows-3 grid-cols-2 grid-flow-col items-center">
+                <img className="w-48 h-48 ring-4 ring-violet-400 object-cover row-span-3 rounded-full" src={employee?.avatar_url}/>
+                <div className="col-span-3">
                   <HealthBar hp={employee?.hp} />
                 </div>
-                <div>
-                  <div className="text-4xl font-semibold">
-                    {employee?.name} {employee?.surname}
-                  </div>
-                  <div className="grid grid-cols-2 divide-x">
-                    <div className="p-1">{employee?.department_name}</div>
-                    <div className="p-1 px-2">{employee?.position_name}</div>
-                  </div>
+                <div className="text-4xl font-semibold col-span-2">
+                  {employee?.name} {employee?.surname}
                 </div>
+                <div className="p-1">{employee?.department_name}</div>
+                <div className="p-1 px-2">{employee?.position_name}</div>
               </div>
-              <div className="h-full w-2/3">
-                <OverallScore employeeID={employeeID}/>
+              <div className="h-full w-full">
+                <OverallScore employeeID={employeeID} />
               </div>
-            </div>
+            </>
           ) : (
             <div className="flex h-fit w-full animate-pulse items-center justify-center bg-gray-300">
               Loading...
             </div>
           )}
           {/* chart */}
-          <div className=" h-96 w-full">
+          <div className="h-96 w-full">
             <HappinessScoreTrend id={employeeID} />
+          </div>
+          <div className=" w-ful h-3/4 overflow-hidden">
+            <Clocking id={employeeID} />
           </div>
         </div>
       </div>
