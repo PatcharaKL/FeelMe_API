@@ -63,10 +63,10 @@ const transformToChartData = (
     const overallScore = value_over_all_average[i].Value;
 
     const transformedEntry: UserHappinessHistory = {
-      self_points: selfPoints,
-      work_points: workPoints,
-      co_worker_points: coWorkerPoints,
-      overall_score: overallScore,
+      self_points: Number(selfPoints.toFixed(2)),
+      work_points: Number(workPoints.toFixed(2)),
+      co_worker_points: Number(coWorkerPoints.toFixed(2)),
+      overall_score: Number(overallScore.toFixed(2)),
       date: date,
     };
 

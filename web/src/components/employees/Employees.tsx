@@ -7,6 +7,8 @@ import EmployeeDashboard from "../dashboard/EmployeeDashboard";
 import { HealthBar } from "./HealthBar";
 import EditProfile from "./EditProfile";
 import EditIcon from "@mui/icons-material/Edit";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import CreateEmployee from "./CreateEmployee";
 
 interface Employees {
   account_id: number;
@@ -41,8 +43,9 @@ export const Employees = () => {
       return false;
     }
   };
-
-  const empList = employees?.filter(searchFunc).sort((a: any, b: any) => a.account_id - b.account_id)
+  const empList = employees
+    ?.filter(searchFunc)
+    .sort((a: any, b: any) => a.account_id - b.account_id);
   const itemsPerPage = 8;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -56,9 +59,11 @@ export const Employees = () => {
     status: false,
     selectedID: null,
   });
+  const [addVisible, setAddVisible] = useState(false);
 
   return (
     <div className="grid h-full w-3/4 grid-cols-4 gap-2">
+      {addVisible && <CreateEmployee setAddVisible={setAddVisible} />}
       {editVisible.boardShow && (
         <EditProfile
           setEditVisible={setEditVisible}
@@ -81,6 +86,7 @@ export const Employees = () => {
               setSearch={setSearch}
               setEditVisible={setEditVisible}
               editVisible={editVisible}
+              setAddVisible={setAddVisible}
             />
             <CustomPagination
               itemsPerPage={itemsPerPage}
@@ -107,7 +113,7 @@ export const Employees = () => {
             ))}
         </>
       ) : (
-        <div className="h-full w-full animate-pulse bg-slate-400"></div>
+        <div className=""></div>
       )}
     </div>
   );
@@ -131,17 +137,25 @@ const Header = (props: any) => {
             onChange={(e) => props.setSearch(e.target.value)}
           ></input>
         </label>
-        <button
-          className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500 text-white hover:bg-violet-400"
-          onClick={() =>
-            props.setEditVisible({
-              selectedID: 0,
-              status: !props.editVisible.status,
-            })
-          }
-        >
-          <EditIcon />
-        </button>
+        <span className="flex gap-3">
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500 text-white hover:bg-violet-400"
+            onClick={() =>
+              props.setEditVisible({
+                selectedID: 0,
+                status: !props.editVisible.status,
+              })
+            }
+          >
+            <EditIcon />
+          </button>
+          <button
+            className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-600 text-white hover:bg-violet-400"
+            onClick={()=>props.setAddVisible(true)}
+          >
+            <PersonAddIcon />
+          </button>
+        </span>
       </div>
     </div>
   );

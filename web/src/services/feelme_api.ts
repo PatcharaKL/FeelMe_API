@@ -125,6 +125,14 @@ export const feelmeAPI = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+    createUser: builder.mutation({
+      query: (data) => ({
+        url: "/hr/created-employee",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -141,4 +149,5 @@ export const {
   useGetDepartmentProportionQuery,
   useUploadImageMutation,
   useUpdateUserDataMutation,
+  useCreateUserMutation,
 } = feelmeAPI;
