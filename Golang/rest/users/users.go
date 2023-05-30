@@ -23,12 +23,15 @@ const (
 	createFuzzyValue            = "INSERT INTO fuzzy_values (fuzzy_self_points,fuzzy_work_points,fuzzy_co_worker_points,value_over_all,timestamp,account_id) VALUES(?,?,?,?,?,?)RETURNING id;"
 	createdLogTimeStamp         = "INSERT INTO feelme_db.log_timestamps (username,timestamp_type,user_id,time) VALUES (?, ?, ?, ?) RETURNING id;"
 
-	getHappinessScoreByDate             = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp >= ? && timestamp <= ? ;"
-	getHappinessScoreByDateAndAccountId = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp >= ? && timestamp <= ? && account_id = ? ; "
-	getHappinessScoreAll                = "SELECT * FROM fuzzy_values"
-	getHappinessScoreAllByAccountId     = "SELECT * FROM fuzzy_values WHERE account_id = ?;"
-	getHappinessScorePosition           = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.position_id,positions.position_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.positions ON feelme_db.accounts.position_id = feelme_db.positions.position_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id WHERE departments.department_id = ? ORDER BY position_id asc;"
-	getHappinessScoreDepartment         = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.department_id,departments.department_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id ORDER BY department_id asc;"
+	getHappinessScoreByDate                = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp >= ? && timestamp <= ? ;"
+	getHappinessScoreByDateAndAccountId    = "SELECT * FROM feelme_db.fuzzy_values WHERE timestamp >= ? && timestamp <= ? && account_id = ? ; "
+	getHappinessScoreAll                   = "SELECT * FROM fuzzy_values"
+	getHappinessScoreAllByAccountId        = "SELECT * FROM fuzzy_values WHERE account_id = ?;"
+	getHappinessScoreAllByAccountIdAndDate = "SELECT * FROM fuzzy_values WHERE account_id = ? && timestamp >= ? && timestamp <= ?;"
+	getHappinessScoreAllByDate             = "SELECT * FROM fuzzy_values WHERE timestamp >= ? && timestamp <= ?;"
+	getHappinessScorePosition              = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.position_id,positions.position_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.positions ON feelme_db.accounts.position_id = feelme_db.positions.position_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id WHERE departments.department_id = ? ORDER BY position_id asc;"
+	getHappinessScoreDepartment            = "SELECT fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.department_id,departments.department_name FROM feelme_db.fuzzy_values JOIN feelme_db.accounts ON  feelme_db.fuzzy_values.account_id  = feelme_db.accounts.account_id JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id ORDER BY department_id asc;"
+	getHappinessScoreDepartmentByDate      = "SELECT  fuzzy_values.fuzzy_self_points,fuzzy_values.fuzzy_work_points,fuzzy_values.fuzzy_co_worker_points,fuzzy_values.value_over_all,fuzzy_values.account_id,accounts.department_id,departments.department_name FROM feelme_db.accounts  JOIN feelme_db.fuzzy_values  ON  feelme_db.accounts.account_id  = feelme_db.fuzzy_values.account_id  JOIN feelme_db.departments ON feelme_db.accounts.department_id = feelme_db.departments.department_id WHERE timestamp >= ? && timestamp <= ? ORDER BY timestamp asc ;"
 )
 
 type HapPointRequest struct {
