@@ -10,6 +10,7 @@ import {
   Brush,
 } from "recharts";
 import { useGetHappinessPointsQuery } from "../../services/feelme_api";
+import { useAppSelector } from "../../app/hooks";
 
 // interface RawUserHappinessHistory {
 //   id: number;
@@ -79,7 +80,11 @@ const transformToChartData = (
 };
 
 export const HappinessScoreTrend = ({ id = "" }: any) => {
-  const { data, isLoading, isSuccess, error } = useGetHappinessPointsQuery(id);
+  const period = useAppSelector((state) => state.period.period);
+  const { data, isLoading, isSuccess, error } = useGetHappinessPointsQuery({
+    id: id,
+    period: period,
+  });
 
   return (
     <div className="h-full w-full">

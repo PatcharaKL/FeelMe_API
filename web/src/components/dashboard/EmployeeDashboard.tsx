@@ -17,9 +17,9 @@ const EmployeeDashboard = ({ employeeID, setDashboardVisible }: any) => {
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-25 backdrop-blur-sm">
       {/* container */}
-      <div className="flex h-5/6 w-4/5 flex-col overflow-hidden rounded-xl bg-white">
+      <div className="relative flex h-5/6 w-4/5 flex-col overflow-y-scroll rounded-xl bg-white">
         {/* header */}
-        <div className="flex items-center border-b-2 border-violet-100 bg-violet-600 px-14 py-3">
+        <div className="flex sticky top-0 items-center border-b-2 border-violet-100 bg-violet-600 px-14 py-3">
           <div className="text-2xl text-white">Dashboard</div>
           <button
             className="ml-auto"
@@ -33,7 +33,7 @@ const EmployeeDashboard = ({ employeeID, setDashboardVisible }: any) => {
           {!isLoading && isSuccess ? (
             <>
               {/* Information */}
-              <div className="grid grid-rows-3 grid-cols-2 grid-flow-col items-center">
+              <div className="top-0 grid grid-rows-3 grid-cols-2 divide-x grid-flow-col items-center">
                 <img className="w-48 h-48 ring-4 ring-violet-400 object-cover row-span-3 rounded-full" src={employee?.avatar_url}/>
                 <div className="col-span-3">
                   <HealthBar hp={employee?.hp} />
@@ -44,7 +44,7 @@ const EmployeeDashboard = ({ employeeID, setDashboardVisible }: any) => {
                 <div className="p-1">{employee?.department_name}</div>
                 <div className="p-1 px-2">{employee?.position_name}</div>
               </div>
-              <div className="h-full w-full">
+              <div className="h-full w-full col-span-2">
                 <OverallScore employeeID={employeeID} />
               </div>
             </>

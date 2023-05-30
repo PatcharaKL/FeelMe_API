@@ -23,10 +23,10 @@ const Dashboard = () => {
             your company all-time happiness score
           </div>
         </div>
-        <div className=" self-center">
+      </div>
+        <div className="col-span-6 w-full">
           <OverallScore />
         </div>
-      </div>
       <div className=" col-span-3 h-[25rem]">
         <DepartmentBarChart />
       </div>

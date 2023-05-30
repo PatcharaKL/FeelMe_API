@@ -60,8 +60,8 @@ export const feelmeAPI = createApi({
       query: () => `/health-check`,
     }),
     getHappinessPoints: builder.query({
-      query: (id: number) => ({
-        url: `happiness-score-all-time?account-id=${id}`,
+      query: ({ id, period }) => ({
+        url: `happiness-score-all-time?account-id=${id}&period=${period}`,
         method: "GET",
       }),
     }),
@@ -100,8 +100,8 @@ export const feelmeAPI = createApi({
       }),
     }),
     getDepartmentProportion: builder.query({
-      query: () => ({
-        url: `/happiness-score-department`,
+      query: (period) => ({
+        url: `/happiness-score-department?period=${period}`,
         method: "GET",
       }),
     }),

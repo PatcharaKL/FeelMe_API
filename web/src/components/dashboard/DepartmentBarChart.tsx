@@ -10,6 +10,7 @@ import {
   Bar,
 } from "recharts";
 import { useGetDepartmentProportionQuery } from "../../services/feelme_api";
+import { useAppSelector } from "../../app/hooks";
 
 interface FuzzyData {
   Value: number;
@@ -64,7 +65,8 @@ const transformToChartData = (
 };
 
 const DepartmentBarChart = () => {
-  const { data, isLoading, isSuccess } = useGetDepartmentProportionQuery({});
+  const period = useAppSelector(state => state.period.period)
+  const { data, isLoading, isSuccess } = useGetDepartmentProportionQuery(period);
   return (
     <div className="h-full w-full">
       <div className="text-xl font-semibold text-gray-800">

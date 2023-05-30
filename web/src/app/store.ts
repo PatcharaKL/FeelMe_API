@@ -6,6 +6,7 @@ import { feelmeAPI } from "../services/feelme_api";
 import sidebarSelectionReducer from "../features/sidebar-selection/sidebarSelectionSlice";
 import authReducer from "./../features/auth/authSlice";
 import userReducer from "./../features/auth/userSlice";
+import periodReducer from "./../features/period-selection/periodSelectionSlice";
 import { RefreshTokenMiddleware } from "./middleware";
 
 // Create the root reducer separately so we can extract the RootState type
@@ -13,6 +14,7 @@ const rootReducer = combineReducers({
   sidebarSelection: sidebarSelectionReducer,
   auth: authReducer,
   user: userReducer,
+  period: periodReducer,
   [feelmeAPI.reducerPath]: feelmeAPI.reducer,
 });
 export const setupStore = (preloadedState?: PreloadedState<RootState>) => {
