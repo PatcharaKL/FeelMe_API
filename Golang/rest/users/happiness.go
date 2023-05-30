@@ -154,68 +154,242 @@ func (h *Handler) GetHappinessScoreAverage(c echo.Context) error {
 	fuzzy_work_points_average := 0
 	fuzzy_co_worker_points_average := 0
 	value_over_all_average := 0
-	if accountId != "" {
-		rows, err := h.DB.Query(getHappinessScoreAllByAccountId, accountId)
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-		}
-		fuzzy := new(FuzzyValues)
-		for rows.Next() {
-			if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+	switch period := c.QueryParam("period"); period {
+	case "month":
+		{
+			st1 := ""
+			st2 := ""
+			location := time.FixedZone("UTC+7", 7*60*60)
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := "2023-" + arr[1] + "-01 00:00:00"
+			timeStop := "2023-" + arr[1] + "-31 23:59:59"
+			if accountId != "" {
+				rows, err := h.DB.Query(getHappinessScoreAllByAccountIdAndDate, accountId, timeStart, timeStop)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				fuzzy := new(FuzzyValues)
+				for rows.Next() {
+					if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+						return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+					}
+					if st1 == "" {
+						st1 = string(fuzzy.Time)
+					}
+					count++
+					fuzzy_self_points_average += fuzzy.SelfPoints
+					fuzzy_work_points_average += fuzzy.WorkPoints
+					fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+					value_over_all_average += fuzzy.ValueOverAll
+					fuzzy_data = append(fuzzy_data, *fuzzy)
+					st2 = string(fuzzy.Time)
+				}
+				if len(fuzzy_data) == 0 {
+					return c.JSON(http.StatusNoContent, "")
+				}
+				fuzzy_self_points_average = fuzzy_self_points_average / count
+				fuzzy_work_points_average = fuzzy_work_points_average / count
+				fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+				value_over_all_average = value_over_all_average / count
+
+				return c.JSON(http.StatusOK, echo.Map{
+					"fuzzy_self_points_average":      fuzzy_self_points_average,
+					"fuzzy_work_points_average":      fuzzy_work_points_average,
+					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+					"value_over_all_average":         value_over_all_average,
+					"Time":                           st1 + " - " + st2,
+				})
+			}
+			rows, err := h.DB.Query(getHappinessScoreAllByDate, timeStart, timeStop)
+			if err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
-			count++
-			fuzzy_self_points_average += fuzzy.SelfPoints
-			fuzzy_work_points_average += fuzzy.WorkPoints
-			fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
-			value_over_all_average += fuzzy.ValueOverAll
-			fuzzy_data = append(fuzzy_data, *fuzzy)
-		}
-		if len(fuzzy_data) == 0 {
-			return c.JSON(http.StatusNoContent, "")
-		}
-		fuzzy_self_points_average = fuzzy_self_points_average / count
-		fuzzy_work_points_average = fuzzy_work_points_average / count
-		fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
-		value_over_all_average = value_over_all_average / count
+			fuzzy := new(FuzzyValues)
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				if st1 == "" {
+					st1 = string(fuzzy.Time)
+				}
+				count++
+				fuzzy_self_points_average += fuzzy.SelfPoints
+				fuzzy_work_points_average += fuzzy.WorkPoints
+				fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+				value_over_all_average += fuzzy.ValueOverAll
+				fuzzy_data = append(fuzzy_data, *fuzzy)
+				st2 = string(fuzzy.Time)
+			}
+			if len(fuzzy_data) == 0 {
+				return c.JSON(http.StatusNoContent, "")
+			}
+			fuzzy_self_points_average = fuzzy_self_points_average / count
+			fuzzy_work_points_average = fuzzy_work_points_average / count
+			fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+			value_over_all_average = value_over_all_average / count
 
-		return c.JSON(http.StatusOK, echo.Map{
-			"fuzzy_self_points_average":      fuzzy_self_points_average,
-			"fuzzy_work_points_average":      fuzzy_work_points_average,
-			"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
-			"value_over_all_average":         value_over_all_average,
-		})
-	}
-	rows, err := h.DB.Query(getHappinessScoreAll)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
-	fuzzy := new(FuzzyValues)
-	for rows.Next() {
-		if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+				"Time":                           st1 + " - " + st2,
+			})
 		}
-		count++
-		fuzzy_self_points_average += fuzzy.SelfPoints
-		fuzzy_work_points_average += fuzzy.WorkPoints
-		fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
-		value_over_all_average += fuzzy.ValueOverAll
-		fuzzy_data = append(fuzzy_data, *fuzzy)
-	}
-	if len(fuzzy_data) == 0 {
-		return c.JSON(http.StatusNoContent, "")
-	}
-	fuzzy_self_points_average = fuzzy_self_points_average / count
-	fuzzy_work_points_average = fuzzy_work_points_average / count
-	fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
-	value_over_all_average = value_over_all_average / count
+	case "year":
+		{
+			st1 := ""
+			st2 := ""
+			location := time.FixedZone("UTC+7", 7*60*60)
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := arr[0] + "-" + "01-01 00:00:00"
+			timeStop := arr[0] + "-" + "12-31 23:59:59"
+			if accountId != "" {
+				rows, err := h.DB.Query(getHappinessScoreAllByAccountIdAndDate, accountId, timeStart, timeStop)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				fuzzy := new(FuzzyValues)
+				for rows.Next() {
+					if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+						return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+					}
+					if st1 == "" {
+						st1 = string(fuzzy.Time)
+					}
+					count++
+					fuzzy_self_points_average += fuzzy.SelfPoints
+					fuzzy_work_points_average += fuzzy.WorkPoints
+					fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+					value_over_all_average += fuzzy.ValueOverAll
+					fuzzy_data = append(fuzzy_data, *fuzzy)
+					st2 = string(fuzzy.Time)
+				}
+				if len(fuzzy_data) == 0 {
+					return c.JSON(http.StatusNoContent, "")
+				}
+				fuzzy_self_points_average = fuzzy_self_points_average / count
+				fuzzy_work_points_average = fuzzy_work_points_average / count
+				fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+				value_over_all_average = value_over_all_average / count
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"fuzzy_self_points_average":      fuzzy_self_points_average,
-		"fuzzy_work_points_average":      fuzzy_work_points_average,
-		"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
-		"value_over_all_average":         value_over_all_average,
-	})
+				return c.JSON(http.StatusOK, echo.Map{
+					"fuzzy_self_points_average":      fuzzy_self_points_average,
+					"fuzzy_work_points_average":      fuzzy_work_points_average,
+					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+					"value_over_all_average":         value_over_all_average,
+					"Time":                           st1 + " - " + st2,
+				})
+			}
+			rows, err := h.DB.Query(getHappinessScoreAllByDate, timeStart, timeStop)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			fuzzy := new(FuzzyValues)
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				if st1 == "" {
+					st1 = string(fuzzy.Time)
+				}
+				count++
+				fuzzy_self_points_average += fuzzy.SelfPoints
+				fuzzy_work_points_average += fuzzy.WorkPoints
+				fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+				value_over_all_average += fuzzy.ValueOverAll
+				fuzzy_data = append(fuzzy_data, *fuzzy)
+				st2 = string(fuzzy.Time)
+			}
+			if len(fuzzy_data) == 0 {
+				return c.JSON(http.StatusNoContent, "")
+			}
+			fuzzy_self_points_average = fuzzy_self_points_average / count
+			fuzzy_work_points_average = fuzzy_work_points_average / count
+			fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+			value_over_all_average = value_over_all_average / count
+
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+				"Time":                           st1 + " - " + st2,
+			})
+		}
+	case "":
+		{
+			if accountId != "" {
+				rows, err := h.DB.Query(getHappinessScoreAllByAccountId, accountId)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				fuzzy := new(FuzzyValues)
+				for rows.Next() {
+					if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+						return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+					}
+					count++
+					fuzzy_self_points_average += fuzzy.SelfPoints
+					fuzzy_work_points_average += fuzzy.WorkPoints
+					fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+					value_over_all_average += fuzzy.ValueOverAll
+					fuzzy_data = append(fuzzy_data, *fuzzy)
+				}
+				if len(fuzzy_data) == 0 {
+					return c.JSON(http.StatusNoContent, "")
+				}
+				fuzzy_self_points_average = fuzzy_self_points_average / count
+				fuzzy_work_points_average = fuzzy_work_points_average / count
+				fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+				value_over_all_average = value_over_all_average / count
+
+				return c.JSON(http.StatusOK, echo.Map{
+					"fuzzy_self_points_average":      fuzzy_self_points_average,
+					"fuzzy_work_points_average":      fuzzy_work_points_average,
+					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+					"value_over_all_average":         value_over_all_average,
+				})
+			}
+			rows, err := h.DB.Query(getHappinessScoreAll)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			fuzzy := new(FuzzyValues)
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				count++
+				fuzzy_self_points_average += fuzzy.SelfPoints
+				fuzzy_work_points_average += fuzzy.WorkPoints
+				fuzzy_co_worker_points_average += fuzzy.CoWorkerPoints
+				value_over_all_average += fuzzy.ValueOverAll
+				fuzzy_data = append(fuzzy_data, *fuzzy)
+			}
+			if len(fuzzy_data) == 0 {
+				return c.JSON(http.StatusNoContent, "")
+			}
+			fuzzy_self_points_average = fuzzy_self_points_average / count
+			fuzzy_work_points_average = fuzzy_work_points_average / count
+			fuzzy_co_worker_points_average = fuzzy_co_worker_points_average / count
+			value_over_all_average = value_over_all_average / count
+
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+			})
+		}
+	default:
+		{
+			return c.JSON(http.StatusBadRequest, "")
+		}
+	}
+
 }
 
 type FuzzyAverage struct {
@@ -533,9 +707,12 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 		}
 	case "month":
 		{
-			countOfdate := ""
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := "2023-" + arr[1] + "-01 00:00:00"
+			timeStop := "2023-" + arr[1] + "-31 23:59:59"
 			if accountId != "" {
-				rows, err := h.DB.Query(getHappinessScoreAllByAccountId, accountId)
+				rows, err := h.DB.Query(getHappinessScoreAllByAccountIdAndDate, accountId, timeStart, timeStop)
 				if err != nil {
 					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 				}
@@ -544,23 +721,18 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
 						return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 					}
-					res1 := strings.Split(string(fuzzy.Time), "-")
-					res2 := strings.Split(string(fuzzy.Time), " ")
-					if countOfdate == "" {
-						countOfdate = res1[1]
-						startDate = res2[0]
-						srtDate[0] = startDate
+					res := strings.Split(string(fuzzy.Time), " ")
+					if startDate == "" {
+						startDate = res[0]
 					}
-					if countOfdate == res1[1] {
+					if startDate == res[0] {
 						count++
 						fuzzy_self_points += fuzzy.SelfPoints
 						fuzzy_work_points += fuzzy.WorkPoints
 						fuzzy_co_worker_points += fuzzy.CoWorkerPoints
 						value_over_all += fuzzy.ValueOverAll
-						startDate = res2[0]
-						srtDate[1] = startDate
 					}
-					if countOfdate != res1[1] {
+					if startDate != res[0] {
 						data1 := new(FuzzyAverage)
 						data2 := new(FuzzyAverage)
 						data3 := new(FuzzyAverage)
@@ -569,10 +741,10 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 						data2.Value = float32(fuzzy_work_points) / float32(count)
 						data3.Value = float32(fuzzy_co_worker_points) / float32(count)
 						data4.Value = float32(value_over_all) / float32(count)
-						data1.DateTime = srtDate[0] + " - " + srtDate[1]
-						data2.DateTime = srtDate[0] + " - " + srtDate[1]
-						data3.DateTime = srtDate[0] + " - " + srtDate[1]
-						data4.DateTime = srtDate[0] + " - " + srtDate[1]
+						data1.DateTime = startDate
+						data2.DateTime = startDate
+						data3.DateTime = startDate
+						data4.DateTime = startDate
 						fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
 						fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
 						fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
@@ -582,9 +754,7 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 						fuzzy_co_worker_points = fuzzy.CoWorkerPoints
 						value_over_all = fuzzy.ValueOverAll
 						count = 1
-						countOfdate = res1[1]
-						startDate = res2[0]
-						srtDate[0] = startDate
+						startDate = res[0]
 					}
 				}
 				data1 := new(FuzzyAverage)
@@ -595,10 +765,10 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 				data2.Value = float32(fuzzy_work_points) / float32(count)
 				data3.Value = float32(fuzzy_co_worker_points) / float32(count)
 				data4.Value = float32(value_over_all) / float32(count)
-				data1.DateTime = srtDate[0] + " - " + srtDate[1]
-				data2.DateTime = srtDate[0] + " - " + srtDate[1]
-				data3.DateTime = srtDate[0] + " - " + srtDate[1]
-				data4.DateTime = srtDate[0] + " - " + srtDate[1]
+				data1.DateTime = startDate
+				data2.DateTime = startDate
+				data3.DateTime = startDate
+				data4.DateTime = startDate
 				fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
 				fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
 				fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
@@ -608,10 +778,9 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					"fuzzy_work_points_average":      fuzzy_work_points_average,
 					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
 					"value_over_all_average":         value_over_all_average,
-					"Time":                           srtDate[0] + " - " + srtDate[1],
 				})
 			}
-			rows, err := h.DB.Query(getHappinessScoreAll)
+			rows, err := h.DB.Query(getHappinessScoreAllByDate, timeStart, timeStop)
 			if err != nil {
 				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 			}
@@ -620,23 +789,18 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 				if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
 					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
 				}
-				res1 := strings.Split(string(fuzzy.Time), "-")
-				res2 := strings.Split(string(fuzzy.Time), " ")
-				if countOfdate == "" {
-					countOfdate = res1[1]
-					startDate = res2[0]
-					srtDate[0] = startDate
+				res := strings.Split(string(fuzzy.Time), " ")
+				if startDate == "" {
+					startDate = res[0]
 				}
-				if countOfdate == res1[1] {
+				if startDate == res[0] {
 					count++
 					fuzzy_self_points += fuzzy.SelfPoints
 					fuzzy_work_points += fuzzy.WorkPoints
 					fuzzy_co_worker_points += fuzzy.CoWorkerPoints
 					value_over_all += fuzzy.ValueOverAll
-					startDate = res2[0]
-					srtDate[1] = startDate
 				}
-				if countOfdate != res1[1] {
+				if startDate != res[0] {
 					data1 := new(FuzzyAverage)
 					data2 := new(FuzzyAverage)
 					data3 := new(FuzzyAverage)
@@ -645,10 +809,10 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					data2.Value = float32(fuzzy_work_points) / float32(count)
 					data3.Value = float32(fuzzy_co_worker_points) / float32(count)
 					data4.Value = float32(value_over_all) / float32(count)
-					data1.DateTime = srtDate[0] + " - " + srtDate[1]
-					data2.DateTime = srtDate[0] + " - " + srtDate[1]
-					data3.DateTime = srtDate[0] + " - " + srtDate[1]
-					data4.DateTime = srtDate[0] + " - " + srtDate[1]
+					data1.DateTime = startDate
+					data2.DateTime = startDate
+					data3.DateTime = startDate
+					data4.DateTime = startDate
 					fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
 					fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
 					fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
@@ -658,9 +822,7 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 					fuzzy_co_worker_points = fuzzy.CoWorkerPoints
 					value_over_all = fuzzy.ValueOverAll
 					count = 1
-					countOfdate = res1[1]
-					startDate = res2[0]
-					srtDate[0] = startDate
+					startDate = res[0]
 				}
 			}
 			data1 := new(FuzzyAverage)
@@ -671,10 +833,10 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 			data2.Value = float32(fuzzy_work_points) / float32(count)
 			data3.Value = float32(fuzzy_co_worker_points) / float32(count)
 			data4.Value = float32(value_over_all) / float32(count)
-			data1.DateTime = srtDate[0] + " - " + srtDate[1]
-			data2.DateTime = srtDate[0] + " - " + srtDate[1]
-			data3.DateTime = srtDate[0] + " - " + srtDate[1]
-			data4.DateTime = srtDate[0] + " - " + srtDate[1]
+			data1.DateTime = startDate
+			data2.DateTime = startDate
+			data3.DateTime = startDate
+			data4.DateTime = startDate
 			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
 			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
 			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
@@ -684,7 +846,149 @@ func (h *Handler) GetHappinessScoreAllTimeAverage(c echo.Context) error {
 				"fuzzy_work_points_average":      fuzzy_work_points_average,
 				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
 				"value_over_all_average":         value_over_all_average,
-				"Time":                           srtDate[0] + " - " + srtDate[1],
+			})
+		}
+	case "year":
+		{
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := arr[0] + "-" + "01-01 00:00:00"
+			timeStop := arr[0] + "-" + "12-31 23:59:59"
+			if accountId != "" {
+				rows, err := h.DB.Query(getHappinessScoreAllByAccountIdAndDate, accountId, timeStart, timeStop)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				fuzzy := new(FuzzyValues)
+				for rows.Next() {
+					if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+						return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+					}
+					res := strings.Split(string(fuzzy.Time), " ")
+					if startDate == "" {
+						startDate = res[0]
+					}
+					if startDate == res[0] {
+						count++
+						fuzzy_self_points += fuzzy.SelfPoints
+						fuzzy_work_points += fuzzy.WorkPoints
+						fuzzy_co_worker_points += fuzzy.CoWorkerPoints
+						value_over_all += fuzzy.ValueOverAll
+					}
+					if startDate != res[0] {
+						data1 := new(FuzzyAverage)
+						data2 := new(FuzzyAverage)
+						data3 := new(FuzzyAverage)
+						data4 := new(FuzzyAverage)
+						data1.Value = float32(fuzzy_self_points) / float32(count)
+						data2.Value = float32(fuzzy_work_points) / float32(count)
+						data3.Value = float32(fuzzy_co_worker_points) / float32(count)
+						data4.Value = float32(value_over_all) / float32(count)
+						data1.DateTime = startDate
+						data2.DateTime = startDate
+						data3.DateTime = startDate
+						data4.DateTime = startDate
+						fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+						fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+						fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+						value_over_all_average = append(value_over_all_average, *data4)
+						fuzzy_self_points = fuzzy.SelfPoints
+						fuzzy_work_points = fuzzy.WorkPoints
+						fuzzy_co_worker_points = fuzzy.CoWorkerPoints
+						value_over_all = fuzzy.ValueOverAll
+						count = 1
+						startDate = res[0]
+					}
+				}
+				data1 := new(FuzzyAverage)
+				data2 := new(FuzzyAverage)
+				data3 := new(FuzzyAverage)
+				data4 := new(FuzzyAverage)
+				data1.Value = float32(fuzzy_self_points) / float32(count)
+				data2.Value = float32(fuzzy_work_points) / float32(count)
+				data3.Value = float32(fuzzy_co_worker_points) / float32(count)
+				data4.Value = float32(value_over_all) / float32(count)
+				data1.DateTime = startDate
+				data2.DateTime = startDate
+				data3.DateTime = startDate
+				data4.DateTime = startDate
+				fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+				fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+				fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+				value_over_all_average = append(value_over_all_average, *data4)
+				return c.JSON(http.StatusOK, echo.Map{
+					"fuzzy_self_points_average":      fuzzy_self_points_average,
+					"fuzzy_work_points_average":      fuzzy_work_points_average,
+					"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+					"value_over_all_average":         value_over_all_average,
+				})
+			}
+			rows, err := h.DB.Query(getHappinessScoreAllByDate, timeStart, timeStop)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			fuzzy := new(FuzzyValues)
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.Id, &fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints, &fuzzy.ValueOverAll, &fuzzy.Time, &fuzzy.AccountId); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				res := strings.Split(string(fuzzy.Time), " ")
+				if startDate == "" {
+					startDate = res[0]
+				}
+				if startDate == res[0] {
+					count++
+					fuzzy_self_points += fuzzy.SelfPoints
+					fuzzy_work_points += fuzzy.WorkPoints
+					fuzzy_co_worker_points += fuzzy.CoWorkerPoints
+					value_over_all += fuzzy.ValueOverAll
+				}
+				if startDate != res[0] {
+					data1 := new(FuzzyAverage)
+					data2 := new(FuzzyAverage)
+					data3 := new(FuzzyAverage)
+					data4 := new(FuzzyAverage)
+					data1.Value = float32(fuzzy_self_points) / float32(count)
+					data2.Value = float32(fuzzy_work_points) / float32(count)
+					data3.Value = float32(fuzzy_co_worker_points) / float32(count)
+					data4.Value = float32(value_over_all) / float32(count)
+					data1.DateTime = startDate
+					data2.DateTime = startDate
+					data3.DateTime = startDate
+					data4.DateTime = startDate
+					fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+					fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+					fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+					value_over_all_average = append(value_over_all_average, *data4)
+					fuzzy_self_points = fuzzy.SelfPoints
+					fuzzy_work_points = fuzzy.WorkPoints
+					fuzzy_co_worker_points = fuzzy.CoWorkerPoints
+					value_over_all = fuzzy.ValueOverAll
+					count = 1
+					startDate = res[0]
+				}
+			}
+			data1 := new(FuzzyAverage)
+			data2 := new(FuzzyAverage)
+			data3 := new(FuzzyAverage)
+			data4 := new(FuzzyAverage)
+			data1.Value = float32(fuzzy_self_points) / float32(count)
+			data2.Value = float32(fuzzy_work_points) / float32(count)
+			data3.Value = float32(fuzzy_co_worker_points) / float32(count)
+			data4.Value = float32(value_over_all) / float32(count)
+			data1.DateTime = startDate
+			data2.DateTime = startDate
+			data3.DateTime = startDate
+			data4.DateTime = startDate
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
 			})
 		}
 	default:
@@ -856,32 +1160,75 @@ func (h *Handler) GetHappinessScoreDepartMentAllTime(c echo.Context) error {
 	var fuzzy_co_worker_points_average []FuzzyAverageByDepartMent
 	var value_over_all_average []FuzzyAverageByDepartMent
 	departmentId := 1
-	fuzzy_self_points := 0
-	fuzzy_work_points := 0
-	fuzzy_co_worker_points := 0
-	value_over_all := 0
-	count := 0
+	fuzzy_self_points_ce := 0
+	fuzzy_work_points_ce := 0
+	fuzzy_co_worker_points_ce := 0
+	value_over_all_ce := 0
+	fuzzy_self_points_mle := 0
+	fuzzy_work_points_mle := 0
+	fuzzy_co_worker_points_mle := 0
+	value_over_all_mle := 0
+	fuzzy_self_points_it := 0
+	fuzzy_work_points_it := 0
+	fuzzy_co_worker_points_it := 0
+	value_over_all_it := 0
+	count_ce := 0
+	count_mle := 0
+	count_it := 0
 	departMentNane := ""
-	rows, err := h.DB.Query(getHappinessScoreDepartment)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-	}
-	for rows.Next() {
-		if err := rows.Scan(&fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints,
-			&fuzzy.ValueOverAll, &fuzzy.AccountId, &fuzzy.DepartMentId, &fuzzy.DepartMentName); err != nil {
-			return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
-		}
-		if departMentNane == "" {
-			departMentNane = fuzzy.DepartMentName
-		}
-		if departmentId == fuzzy.DepartMentId {
-			fuzzy_self_points += fuzzy.SelfPoints
-			fuzzy_work_points += fuzzy.WorkPoints
-			fuzzy_co_worker_points += fuzzy.CoWorkerPoints
-			value_over_all += fuzzy.ValueOverAll
-			count++
-		}
-		if departmentId != fuzzy.DepartMentId {
+	switch period := c.QueryParam("period"); period {
+	case "":
+		{
+			fuzzy_self_points := 0
+			fuzzy_work_points := 0
+			fuzzy_co_worker_points := 0
+			value_over_all := 0
+			count := 0
+			rows, err := h.DB.Query(getHappinessScoreDepartment)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints,
+					&fuzzy.ValueOverAll, &fuzzy.AccountId, &fuzzy.DepartMentId, &fuzzy.DepartMentName); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				if departMentNane == "" {
+					departMentNane = fuzzy.DepartMentName
+				}
+				if departmentId == fuzzy.DepartMentId {
+					fuzzy_self_points += fuzzy.SelfPoints
+					fuzzy_work_points += fuzzy.WorkPoints
+					fuzzy_co_worker_points += fuzzy.CoWorkerPoints
+					value_over_all += fuzzy.ValueOverAll
+					count++
+				}
+				if departmentId != fuzzy.DepartMentId {
+					data1 := new(FuzzyAverageByDepartMent)
+					data2 := new(FuzzyAverageByDepartMent)
+					data3 := new(FuzzyAverageByDepartMent)
+					data4 := new(FuzzyAverageByDepartMent)
+					data1.Value = float32(fuzzy_self_points) / float32(count)
+					data2.Value = float32(fuzzy_work_points) / float32(count)
+					data3.Value = float32(fuzzy_co_worker_points) / float32(count)
+					data4.Value = float32(value_over_all) / float32(count)
+					data1.Department = departMentNane
+					data2.Department = departMentNane
+					data3.Department = departMentNane
+					data4.Department = departMentNane
+					fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+					fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+					fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+					value_over_all_average = append(value_over_all_average, *data4)
+					fuzzy_self_points = fuzzy.SelfPoints
+					fuzzy_work_points = fuzzy.WorkPoints
+					fuzzy_co_worker_points = fuzzy.CoWorkerPoints
+					value_over_all = fuzzy.ValueOverAll
+					count = 1
+					departMentNane = fuzzy.DepartMentName
+					departmentId = fuzzy.DepartMentId
+				}
+			}
 			data1 := new(FuzzyAverageByDepartMent)
 			data2 := new(FuzzyAverageByDepartMent)
 			data3 := new(FuzzyAverageByDepartMent)
@@ -898,36 +1245,194 @@ func (h *Handler) GetHappinessScoreDepartMentAllTime(c echo.Context) error {
 			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
 			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
 			value_over_all_average = append(value_over_all_average, *data4)
-			fuzzy_self_points = fuzzy.SelfPoints
-			fuzzy_work_points = fuzzy.WorkPoints
-			fuzzy_co_worker_points = fuzzy.CoWorkerPoints
-			value_over_all = fuzzy.ValueOverAll
-			count = 1
-			departMentNane = fuzzy.DepartMentName
-			departmentId = fuzzy.DepartMentId
-		}
-	}
-	data1 := new(FuzzyAverageByDepartMent)
-	data2 := new(FuzzyAverageByDepartMent)
-	data3 := new(FuzzyAverageByDepartMent)
-	data4 := new(FuzzyAverageByDepartMent)
-	data1.Value = float32(fuzzy_self_points) / float32(count)
-	data2.Value = float32(fuzzy_work_points) / float32(count)
-	data3.Value = float32(fuzzy_co_worker_points) / float32(count)
-	data4.Value = float32(value_over_all) / float32(count)
-	data1.Department = departMentNane
-	data2.Department = departMentNane
-	data3.Department = departMentNane
-	data4.Department = departMentNane
-	fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
-	fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
-	fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
-	value_over_all_average = append(value_over_all_average, *data4)
 
-	return c.JSON(http.StatusOK, echo.Map{
-		"fuzzy_self_points_average":      fuzzy_self_points_average,
-		"fuzzy_work_points_average":      fuzzy_work_points_average,
-		"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
-		"value_over_all_average":         value_over_all_average,
-	})
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+			})
+		}
+	case "month":
+		{
+			location := time.FixedZone("UTC+7", 7*60*60)
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := "2023-" + arr[1] + "-01 00:00:00"
+			timeStop := "2023-" + arr[1] + "-31 23:59:59"
+			rows, err := h.DB.Query(getHappinessScoreDepartmentByDate, timeStart, timeStop)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints,
+					&fuzzy.ValueOverAll, &fuzzy.AccountId, &fuzzy.DepartMentId, &fuzzy.DepartMentName); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				if fuzzy.DepartMentName == "CE" {
+					fuzzy_self_points_ce += fuzzy.SelfPoints
+					fuzzy_work_points_ce += fuzzy.WorkPoints
+					fuzzy_co_worker_points_ce += fuzzy.CoWorkerPoints
+					value_over_all_ce += fuzzy.ValueOverAll
+					count_ce++
+				}
+				if fuzzy.DepartMentName == "IT" {
+					fuzzy_self_points_it += fuzzy.SelfPoints
+					fuzzy_work_points_it += fuzzy.WorkPoints
+					fuzzy_co_worker_points_it += fuzzy.CoWorkerPoints
+					value_over_all_it += fuzzy.ValueOverAll
+					count_it++
+				}
+				if fuzzy.DepartMentName == "MLE" {
+					fuzzy_self_points_mle += fuzzy.SelfPoints
+					fuzzy_work_points_mle += fuzzy.WorkPoints
+					fuzzy_co_worker_points_mle += fuzzy.CoWorkerPoints
+					value_over_all_mle += fuzzy.ValueOverAll
+					count_mle++
+				}
+			}
+
+			data1 := new(FuzzyAverageByDepartMent)
+			data2 := new(FuzzyAverageByDepartMent)
+			data3 := new(FuzzyAverageByDepartMent)
+			data4 := new(FuzzyAverageByDepartMent)
+			data1.Value = float32(fuzzy_self_points_ce) / float32(count_ce)
+			data2.Value = float32(fuzzy_work_points_ce) / float32(count_ce)
+			data3.Value = float32(fuzzy_co_worker_points_ce) / float32(count_ce)
+			data4.Value = float32(value_over_all_ce) / float32(count_ce)
+			data1.Department = "CE"
+			data2.Department = "CE"
+			data3.Department = "CE"
+			data4.Department = "CE"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+
+			data1.Value = float32(fuzzy_self_points_it) / float32(count_it)
+			data2.Value = float32(fuzzy_work_points_it) / float32(count_it)
+			data3.Value = float32(fuzzy_co_worker_points_it) / float32(count_it)
+			data4.Value = float32(value_over_all_it) / float32(count_it)
+			data1.Department = "IT"
+			data2.Department = "IT"
+			data3.Department = "IT"
+			data4.Department = "IT"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+
+			data1.Value = float32(fuzzy_self_points_mle) / float32(count_mle)
+			data2.Value = float32(fuzzy_work_points_mle) / float32(count_mle)
+			data3.Value = float32(fuzzy_co_worker_points_mle) / float32(count_mle)
+			data4.Value = float32(value_over_all_mle) / float32(count_mle)
+			data1.Department = "MLE"
+			data2.Department = "MLE"
+			data3.Department = "MLE"
+			data4.Department = "MLE"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+			})
+		}
+	case "year":
+		{
+			location := time.FixedZone("UTC+7", 7*60*60)
+			times := time.Now().In(location).Format(DDMMYYYYhhmmss)
+			arr := strings.Split(times, "-")
+			timeStart := arr[0] + "-" + "01-01 00:00:00"
+			timeStop := arr[0] + "-" + "12-31 23:59:59"
+			rows, err := h.DB.Query(getHappinessScoreDepartmentByDate, timeStart, timeStop)
+			if err != nil {
+				return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+			}
+			for rows.Next() {
+				if err := rows.Scan(&fuzzy.SelfPoints, &fuzzy.WorkPoints, &fuzzy.CoWorkerPoints,
+					&fuzzy.ValueOverAll, &fuzzy.AccountId, &fuzzy.DepartMentId, &fuzzy.DepartMentName); err != nil {
+					return c.JSON(http.StatusInternalServerError, Err{Message: err.Error()})
+				}
+				if fuzzy.DepartMentName == "CE" {
+					fuzzy_self_points_ce += fuzzy.SelfPoints
+					fuzzy_work_points_ce += fuzzy.WorkPoints
+					fuzzy_co_worker_points_ce += fuzzy.CoWorkerPoints
+					value_over_all_ce += fuzzy.ValueOverAll
+					count_ce++
+				}
+				if fuzzy.DepartMentName == "IT" {
+					fuzzy_self_points_it += fuzzy.SelfPoints
+					fuzzy_work_points_it += fuzzy.WorkPoints
+					fuzzy_co_worker_points_it += fuzzy.CoWorkerPoints
+					value_over_all_it += fuzzy.ValueOverAll
+					count_it++
+				}
+				if fuzzy.DepartMentName == "MLE" {
+					fuzzy_self_points_mle += fuzzy.SelfPoints
+					fuzzy_work_points_mle += fuzzy.WorkPoints
+					fuzzy_co_worker_points_mle += fuzzy.CoWorkerPoints
+					value_over_all_mle += fuzzy.ValueOverAll
+					count_mle++
+				}
+			}
+
+			data1 := new(FuzzyAverageByDepartMent)
+			data2 := new(FuzzyAverageByDepartMent)
+			data3 := new(FuzzyAverageByDepartMent)
+			data4 := new(FuzzyAverageByDepartMent)
+			data1.Value = float32(fuzzy_self_points_ce) / float32(count_ce)
+			data2.Value = float32(fuzzy_work_points_ce) / float32(count_ce)
+			data3.Value = float32(fuzzy_co_worker_points_ce) / float32(count_ce)
+			data4.Value = float32(value_over_all_ce) / float32(count_ce)
+			data1.Department = "CE"
+			data2.Department = "CE"
+			data3.Department = "CE"
+			data4.Department = "CE"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+
+			data1.Value = float32(fuzzy_self_points_it) / float32(count_it)
+			data2.Value = float32(fuzzy_work_points_it) / float32(count_it)
+			data3.Value = float32(fuzzy_co_worker_points_it) / float32(count_it)
+			data4.Value = float32(value_over_all_it) / float32(count_it)
+			data1.Department = "IT"
+			data2.Department = "IT"
+			data3.Department = "IT"
+			data4.Department = "IT"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+
+			data1.Value = float32(fuzzy_self_points_mle) / float32(count_mle)
+			data2.Value = float32(fuzzy_work_points_mle) / float32(count_mle)
+			data3.Value = float32(fuzzy_co_worker_points_mle) / float32(count_mle)
+			data4.Value = float32(value_over_all_mle) / float32(count_mle)
+			data1.Department = "MLE"
+			data2.Department = "MLE"
+			data3.Department = "MLE"
+			data4.Department = "MLE"
+			fuzzy_self_points_average = append(fuzzy_self_points_average, *data1)
+			fuzzy_work_points_average = append(fuzzy_work_points_average, *data2)
+			fuzzy_co_worker_points_average = append(fuzzy_co_worker_points_average, *data3)
+			value_over_all_average = append(value_over_all_average, *data4)
+			return c.JSON(http.StatusOK, echo.Map{
+				"fuzzy_self_points_average":      fuzzy_self_points_average,
+				"fuzzy_work_points_average":      fuzzy_work_points_average,
+				"fuzzy_co_worker_points_average": fuzzy_co_worker_points_average,
+				"value_over_all_average":         value_over_all_average,
+			})
+		}
+	default:
+		{
+			return c.JSON(http.StatusBadRequest, "")
+		}
+
+	}
 }
