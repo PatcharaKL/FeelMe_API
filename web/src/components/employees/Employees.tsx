@@ -205,7 +205,7 @@ const EmployeesCard = ({
   return (
     <>
       <div
-        className="relative"
+        className="relative w-64"
         onClick={() =>
           setDashboardVisible({
             status: !editVisible.status,
@@ -215,7 +215,7 @@ const EmployeesCard = ({
       >
         {editVisible.status && <EditOverlay />}
         {hp <= 0 && <Overlay />}
-        <div className="flex h-fit w-64 flex-col items-center gap-3 overflow-hidden rounded-lg bg-violet-50 px-4 py-8 text-center shadow-lg shadow-violet-100">
+        <div className="flex h-fit w-full flex-col items-center gap-3 overflow-hidden rounded-lg bg-violet-50 px-4 py-8 text-center shadow-lg shadow-violet-100">
           <HealthBar hp={hp} />
           <div>{editVisible.status}</div>
           <CardImage avatarURL={avatar_url}></CardImage>
